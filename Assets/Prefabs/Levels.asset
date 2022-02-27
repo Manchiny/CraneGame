@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 636f0dc996a3987428f9e24d33777842, type: 3}
+  m_Name: Levels
+  m_EditorClassIdentifier: 
+  _levelConfigs:
+  - _id: 0
+    _shipConfig:
+    - _raws: 1
+      _availibleColors:
+      - _color: 1
+        _maxCount: 4
+      _shipPrefab: {fileID: 6767250939860062568, guid: 24568292731ec524389c455b4bb6dc7c, type: 3}
+    - _raws: 1
+      _availibleColors:
+      - _color: 2
+        _maxCount: 2
+      _shipPrefab: {fileID: 6767250939860062568, guid: e40ea0adc3ff3904cb3ac00ccc7013bd, type: 3}
