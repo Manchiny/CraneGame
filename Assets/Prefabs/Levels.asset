@@ -25,3 +25,21 @@ MonoBehaviour:
       - _color: 2
         _maxCount: 2
       _shipPrefab: {fileID: 6767250939860062568, guid: e40ea0adc3ff3904cb3ac00ccc7013bd, type: 3}
+    - _raws: 1
+      _availibleColors:
+      - _color: 3
+        _maxCount: 2
+      - _color: 2
+        _maxCount: 4
+      - _color: 0
+        _maxCount: 1
+      _shipPrefab: {fileID: 6767250939860062568, guid: e40ea0adc3ff3904cb3ac00ccc7013bd, type: 3}
+    - _raws: 1
+      _availibleColors:
+      - _color: 3
+        _maxCount: 4
+      - _color: 2
+        _maxCount: 4
+      - _color: 1
+        _maxCount: 4
+      _shipPrefab: {fileID: 6767250939860062568, guid: e40ea0adc3ff3904cb3ac00ccc7013bd, type: 3}

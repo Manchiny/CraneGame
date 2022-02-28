@@ -43,6 +43,7 @@ public class LevelManager : MonoBehaviour
             CurrentShip.MoveTo(_shipSpawner.ParkingPoint);
             _nextShipId++;
             CurrentShip.OnContainersEnded += OnContainersEnded;
+            ParkingManager.Instance.SubscribeOnCrush(CurrentShip);
         }
         else
         {

@@ -13,6 +13,7 @@ public class MagnitChecker : MonoBehaviour
     }
     public void SetStatus(bool isFree)
     {
-        _collider.enabled = isFree;
+        if (_collider != null)
+            _collider.enabled = isFree;
     }
 }

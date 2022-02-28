@@ -29,9 +29,13 @@ public class ParkingManager : MonoBehaviour
 
     public void Init()
     {
-        LevelManager.Instance.CurrentShip.OnCrush += OnContainerCrush;
         InitParkingPlaces();
         _spawner.Init(OnNewCarCreated);
+    }
+
+    public void SubscribeOnCrush(Ship ship)
+    {
+        ship.OnCrush += OnContainerCrush;
     }
     private void InitParkingPlaces()
     {
@@ -81,7 +85,7 @@ public class ParkingManager : MonoBehaviour
         ParkingPlace place = null;
         for (int i = _parkingPlaces.Length - 1; i >= 0; i--)
         {
-            if (_parkingPlaces[i].IsFree)// && !_parkingPlaces[i].IsAwate)
+            if (_parkingPlaces[i].IsFree)
                 place = _parkingPlaces[i];
             else
                 return place;
@@ -106,12 +110,12 @@ public class ParkingManager : MonoBehaviour
     }
     private void ReplaceCarsIfCan()
     {
-        foreach (var place in _parkingPlaces)
+        foreach (var car in _allCarsOnParking)
         {
             var freeplace = GetFreeParkingPlaceOnHead();
-            if (freeplace != null && freeplace.Id < place.Id && !place.IsFree)
+            if (freeplace != null && freeplace.Id < car.CurrentPlace.Id)
             {
-                place.Car.MoveToParking(freeplace);
+                car.MoveToParking(freeplace);
             }
         }
     }
@@ -126,15 +130,13 @@ public class ParkingManager : MonoBehaviour
             {
                 _allCarsOnParking[0].MoveToExit();
             }
-            else
+            else if (_allCarsOnParking.Count > 0)
             {
                 ReplaceCarsIfCan();
             }
 
             _spawner.AddCarToQueue();
         }
-             
-
     }
 
     public void OnNewCarCreated(Car car)
@@ -149,5 +151,24 @@ public class ParkingManager : MonoBehaviour
     {
         car.OnCompleteLoading -= OnCarCompleteLoading;
         _activeCars.Remove(car);
+
+        if (car.CurrentPlace.Id == 0 || IsWayFree() == true)
+            car.MoveToExit();
+
+        bool IsWayFree()
+        {
+            for (int i = 0; i < car.CurrentPlace.Id; i++)
+            {
+                if (_parkingPlaces[i].IsFree == false)
+                    return false;
+            }
+
+            return true;
+        }
+    }
+
+    private void MoveNextIfCan()
+    {
+
     }
 }

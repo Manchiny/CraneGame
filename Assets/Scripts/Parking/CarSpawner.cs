@@ -36,18 +36,15 @@ public class CarSpawner : MonoBehaviour
         {
             ContainerColor color = LevelManager.Instance.GetRandomAvailibleContainerColor();
 
-            if(color != null)
-            {
-                var position = _spawnPoint.position;
-                position.y = 0;
+            var position = _spawnPoint.position;
+            position.y = 0;
 
-                _car = Instantiate(_carPrefab, position, _spawnPoint.rotation).GetComponent<Car>();
-                _needCars--;
-                _car.Init(place, color);
-               // _car.MoveToParking(place, color);
-                OnNewCarCreate(_car);
-                StartTimer();
-            }       
+            _car = Instantiate(_carPrefab, position, _spawnPoint.rotation).GetComponent<Car>();
+            _needCars--;
+            _car.Init(place, color);
+            // _car.MoveToParking(place, color);
+            OnNewCarCreate?.Invoke(_car);
+            StartTimer();
         }
     }
 
@@ -84,7 +81,9 @@ public class CarSpawner : MonoBehaviour
         else
         {
             _timerDispose.Clear();
-            CreateCar();
+
+            if(_needCars > 0)
+                CreateCar();
         }
     }
 }

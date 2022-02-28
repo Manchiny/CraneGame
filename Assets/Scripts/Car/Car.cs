@@ -28,18 +28,12 @@ public class Car : MonoBehaviour
 
     public ParkingPlace CurrentPlace { get; private set; }
     private CompositeDisposable _disposeMove = new CompositeDisposable();
-  //  public bool AwaitFreeWay { get; private set; }
     public bool IsComplete { get; private set; }
     public bool IsWayFree { get; private set; } = true;
 
     public Action<Car> OnMoveExit;
     public Action<Car, bool> OnCompleteLoading;
     public Action<ContainerColor> OnColorSet;
-   // public Action OnCanMove;
-    private void Awake()
-    {
-        _platform = GetComponentInChildren<CarPlatform>();
-    }
 
     public void Init(ParkingPlace place, ContainerColor needColor)
     {
@@ -70,7 +64,7 @@ public class Car : MonoBehaviour
 
     public void MoveToParking(ParkingPlace place)
     {
-        // place.IsAwate = true;
+        _disposeMove.Clear();
         place.SetCar(this);
         if (CurrentPlace != null)
         {
@@ -84,18 +78,19 @@ public class Car : MonoBehaviour
     }
     private void OnParking(ParkingPlace place)
     {
+        _disposeMove.Clear();
+
         CurrentPlace = place;
         place.SetCar(this);
-        _disposeMove.Clear();
+
+        if (IsComplete)
+            MoveToExit();
     }
 
     public void CopmpleteLoading(bool isSuccess)
     {
         IsComplete = true;
-
-        MoveToExit();
         _colorSignal.gameObject.SetActive(false);
-
         OnCompleteLoading?.Invoke(this, isSuccess);
     }
 
@@ -104,13 +99,18 @@ public class Car : MonoBehaviour
         _disposeMove.Clear();
 
         Transform exit = ParkingManager.Instance.GetExitPoint();
-
         Observable.EveryUpdate().Subscribe(_ =>
         {
             MoveTo(exit, OnExit);
         }).AddTo(_disposeMove);
     }
-
+    private void OnExit()
+    {
+        _disposeMove.Clear();
+        CurrentPlace.SetCar(null);
+        OnMoveExit?.Invoke(this);
+        Destroy(gameObject);
+    }
     private void SetColorSignal(ContainerColor color)
     {
         Material material = LevelManager.Instance.GetSignalMaterial(color);
@@ -137,17 +137,6 @@ public class Car : MonoBehaviour
 
     public void SetCanMove(bool value)
     {
-        IsWayFree = value;
-        //if (value == true)
-        //{
-        //    OnCanMove?.Invoke();
-        //}          
-    }
-    private void OnExit()
-    {
-        _disposeMove.Clear();
-        CurrentPlace.SetCar(null);
-        OnMoveExit?.Invoke(this);
-        Destroy(gameObject);
+        IsWayFree = value;      
     }
 }

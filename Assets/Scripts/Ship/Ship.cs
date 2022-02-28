@@ -40,20 +40,6 @@ public class Ship : MonoBehaviour
     {
         var newAvailableColors = availableColors;
         float offset = 0.1f;
-        //bool isCountStrongly = true;
-        //int stronglyCount = 0;
-
-        //foreach (var item in availableColors)
-        //{
-        //    stronglyCount += item.Value;
-
-        //    if(item.Value == 0)
-        //    {
-        //        isCountStrongly = false;
-        //        stronglyCount = 0;
-        //        continue;
-        //    }
-        //}
 
         if (stronglyCount > 0)
         {
