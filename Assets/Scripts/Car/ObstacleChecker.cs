@@ -15,7 +15,7 @@ public class ObstacleChecker : MonoBehaviour
         if(other.gameObject.GetComponent<Container>() != null || other.gameObject.GetComponent<CarPlatform>() != null)
         {
             _obstacles.Add(other);
-            _car.SetCanMove(false);
+            _car.SetFreeWay(false);
         }
        
     }
@@ -27,7 +27,7 @@ public class ObstacleChecker : MonoBehaviour
             _obstacles.Remove(other);
 
             if (_obstacles.Count == 0)
-                _car.SetCanMove(true);
+                _car.SetFreeWay(true);
         }
     }
 }

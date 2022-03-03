@@ -1,3 +1,4 @@
+using RSG;
 using System.Collections.Generic;
 using UnityEngine;
 using static ColorManager;
@@ -7,35 +8,38 @@ public class LevelManager : MonoBehaviour
 {
     public static LevelManager Instance { get; private set; }
 
-    [SerializeField] private ColorManager _colors;
     [SerializeField] private ShipSpawner _shipSpawner;
-
     public LevelConfig LevelConfig { get; private set; }
     public Ship CurrentShip { get; private set; }
     private int _nextShipId;
-    public ColorManager ColorManager => _colors;
-    public Color GetConformigSignalColor(ContainerColor color) => ColorManager.GetConformingColor(color);
+    public Color GetConformigSignalColor(ContainerColor color) => Game.ColorManager.GetConformingColor(color);
     private void Awake()
     {
         if (Instance == null)
         {
             Instance = this;
+            DontDestroyOnLoad(gameObject);
 
             return;
         }
         Destroy(this);
     }
 
-    public void Init(LevelConfig config)
+    public IPromise StartLevel(LevelConfig config)
     {
-        _colors.Init();
+        Promise promise = new Promise();
+
         _nextShipId = 0;
         LevelConfig = config;
-        CreateShipOrLevelComplete();
-        ParkingManager.Instance.Init();
+
+            CreateShipOrLevelComplete()
+            .Then(() => ParkingManager.Instance.Init())
+            .Then(() => promise.Resolve());
+
+        return promise;
     }
 
-    private void CreateShipOrLevelComplete()
+    private IPromise CreateShipOrLevelComplete()
     {
         if(_nextShipId < LevelConfig?.ShipConfig?.Length)
         {
@@ -49,6 +53,8 @@ public class LevelManager : MonoBehaviour
         {
             Debug.Log("Level complete");
         }
+
+        return Promise.Resolved();
     }
 
     public ContainerColor GetRandomAvailibleContainerColor()
@@ -70,7 +76,7 @@ public class LevelManager : MonoBehaviour
 
     public Material GetSignalMaterial(ContainerColor color)
     {
-        return ColorManager.GetSignalMaterial(color);
+        return Game.ColorManager.GetSignalMaterial(color);
     }
 
     public bool HasAvailibleContainers()
@@ -100,6 +106,11 @@ public class LevelManager : MonoBehaviour
         CurrentShip.MoveTo(_shipSpawner.ExitPoint);
 
         CreateShipOrLevelComplete();
+    }
+
+    public void ExitLevel()
+    {
+
     }
 
 }

@@ -9,7 +9,6 @@ public class Car : MonoBehaviour
     [SerializeField] private float speed;
     [SerializeField] private MeshRenderer _colorSignal;
     [SerializeField] private ObstacleChecker _obstacleChecker;
-    //[SerializeField] private Transform _target;
 
     private ContainerColor _needColor;
     public ContainerColor NeedColor
@@ -24,12 +23,13 @@ public class Car : MonoBehaviour
     }
     private float _destinationDistance = 0.1f;
     //TODO: Acceleration speed
-    private CarPlatform _platform;
-
     public ParkingPlace CurrentPlace { get; private set; }
     private CompositeDisposable _disposeMove = new CompositeDisposable();
     public bool IsComplete { get; private set; }
     public bool IsWayFree { get; private set; } = true;
+    public bool IsWrongContainer { get; private set; }
+    private HashSet<Container> _wrongContainers = new HashSet<Container>();
+    public bool HasWrongsContainers => _wrongContainers.Count > 0;
 
     public Action<Car> OnMoveExit;
     public Action<Car, bool> OnCompleteLoading;
@@ -56,7 +56,7 @@ public class Car : MonoBehaviour
             return;
         }
 
-        if (IsWayFree)
+        if (IsWayFree && HasWrongsContainers == false)
         {
             transform.position += (target - transform.position).normalized * speed * Time.deltaTime;
         }
@@ -65,12 +65,13 @@ public class Car : MonoBehaviour
     public void MoveToParking(ParkingPlace place)
     {
         _disposeMove.Clear();
-        place.SetCar(this);
+        place.IsAwate = true;
+
         if (CurrentPlace != null)
         {
             CurrentPlace.SetCar(null);
         }
-
+        CurrentPlace = place;
         Observable.EveryUpdate().Subscribe(_ =>
         {
             MoveTo(place.transform, () => OnParking(place));
@@ -79,12 +80,7 @@ public class Car : MonoBehaviour
     private void OnParking(ParkingPlace place)
     {
         _disposeMove.Clear();
-
-        CurrentPlace = place;
         place.SetCar(this);
-
-        if (IsComplete)
-            MoveToExit();
     }
 
     public void CopmpleteLoading(bool isSuccess)
@@ -97,6 +93,7 @@ public class Car : MonoBehaviour
     public void MoveToExit()
     {
         _disposeMove.Clear();
+        CurrentPlace.SetCar(null);
 
         Transform exit = ParkingManager.Instance.GetExitPoint();
         Observable.EveryUpdate().Subscribe(_ =>
@@ -107,7 +104,7 @@ public class Car : MonoBehaviour
     private void OnExit()
     {
         _disposeMove.Clear();
-        CurrentPlace.SetCar(null);
+
         OnMoveExit?.Invoke(this);
         Destroy(gameObject);
     }
@@ -135,8 +132,18 @@ public class Car : MonoBehaviour
         }
     }
 
-    public void SetCanMove(bool value)
+    public void SetFreeWay(bool value)
     {
         IsWayFree = value;      
+    }
+
+    public void AddWrongContainer(Container container)
+    {
+        _wrongContainers.Add(container);
+    }
+
+    public void RemoveWrongContainer(Container container)
+    {
+        _wrongContainers.Remove(container);
     }
 }

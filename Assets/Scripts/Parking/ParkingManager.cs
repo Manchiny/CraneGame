@@ -80,6 +80,55 @@ public class ParkingManager : MonoBehaviour
             OnContainerCrush(_crushedContainers.Peek());
     }
 
+    public void OnNewCarCreated(Car car)
+    {
+        _activeCars.Add(car);
+        _allCarsOnParking.Add(car);
+        car.OnMoveExit += OnCarMoveExit;
+        car.OnCompleteLoading += OnCarCompleteLoading;
+    }
+    private void OnCarMoveExit(Car car)
+    {
+        if (_allCarsOnParking.Count > 0)
+        {
+            _allCarsOnParking.Remove(car);
+            car.OnMoveExit -= OnCarMoveExit;
+
+            _spawner.AddCarToQueue();
+        }
+    }
+    private void OnCarCompleteLoading(Car car, bool isSuccess)
+    {
+        car.OnCompleteLoading -= OnCarCompleteLoading;
+        _activeCars.Remove(car);
+
+        if (car.CurrentPlace.Id == 0)
+        {
+            car.MoveToExit();
+            MoveNextCar(car.CurrentPlace.Id + 1, true);
+        }
+    }
+
+    private void MoveNextCar(int nextPlaceId, bool isPreviousExit)
+    {
+        if (nextPlaceId < _parkingPlaces.Length)
+        {
+            Car car = _parkingPlaces[nextPlaceId].Car;
+            if (car != null)
+            {
+                if (car.IsComplete && isPreviousExit)
+                {
+                    car.MoveToExit();
+                    MoveNextCar(nextPlaceId + 1, true);
+                }
+                else
+                {
+                    car.MoveToParking(GetFreeParkingPlaceOnHead());
+                    MoveNextCar(nextPlaceId + 1, false);
+                }
+            }            
+        }
+    }
     public ParkingPlace GetFreeParkingPlaceOnEnd()
     {
         ParkingPlace place = null;
@@ -97,7 +146,7 @@ public class ParkingManager : MonoBehaviour
         ParkingPlace place = null;
         for (int i = 0; i < _parkingPlaces.Length; i++)
         {
-            if (_parkingPlaces[i].IsFree)// && !_parkingPlaces[i].IsAwate)
+            if (_parkingPlaces[i].IsFree)
             {
                 if (place == null)
                 {
@@ -107,68 +156,5 @@ public class ParkingManager : MonoBehaviour
             }
         }
         return place;
-    }
-    private void ReplaceCarsIfCan()
-    {
-        foreach (var car in _allCarsOnParking)
-        {
-            var freeplace = GetFreeParkingPlaceOnHead();
-            if (freeplace != null && freeplace.Id < car.CurrentPlace.Id)
-            {
-                car.MoveToParking(freeplace);
-            }
-        }
-    }
-
-    private void OnCarMoveExit(Car car)
-    {
-        if(_allCarsOnParking.Count > 0)
-        {
-            _allCarsOnParking.Remove(car);
-            car.OnMoveExit -= OnCarMoveExit;
-            if (_allCarsOnParking.Count > 0 && _allCarsOnParking[0].IsComplete)
-            {
-                _allCarsOnParking[0].MoveToExit();
-            }
-            else if (_allCarsOnParking.Count > 0)
-            {
-                ReplaceCarsIfCan();
-            }
-
-            _spawner.AddCarToQueue();
-        }
-    }
-
-    public void OnNewCarCreated(Car car)
-    {
-        _activeCars.Add(car);
-        _allCarsOnParking.Add(car);
-        car.OnMoveExit += OnCarMoveExit;
-        car.OnCompleteLoading += OnCarCompleteLoading;
-    }
-
-    private void OnCarCompleteLoading(Car car, bool isSuccess)
-    {
-        car.OnCompleteLoading -= OnCarCompleteLoading;
-        _activeCars.Remove(car);
-
-        if (car.CurrentPlace.Id == 0 || IsWayFree() == true)
-            car.MoveToExit();
-
-        bool IsWayFree()
-        {
-            for (int i = 0; i < car.CurrentPlace.Id; i++)
-            {
-                if (_parkingPlaces[i].IsFree == false)
-                    return false;
-            }
-
-            return true;
-        }
-    }
-
-    private void MoveNextIfCan()
-    {
-
     }
 }

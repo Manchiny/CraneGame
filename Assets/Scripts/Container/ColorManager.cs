@@ -1,3 +1,4 @@
+using RSG;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -19,7 +20,7 @@ public class ColorManager : MonoBehaviour
     public Dictionary<ContainerColor, Material> ContainerMaterials { get; private set; }
     public Dictionary<ContainerColor, Material> SignalMaterials { get; private set; }
 
-    public void Init()
+    public IPromise Init()
     {
         ContainerMaterials = new Dictionary<ContainerColor, Material>()
                 {
@@ -36,6 +37,8 @@ public class ColorManager : MonoBehaviour
                     {ContainerColor.Red, _redSignal },
                     {ContainerColor.Green, _greenSignal }
                 };
+
+        return Promise.Resolved();
     }
     public enum ContainerColor
     {

@@ -23,7 +23,6 @@ public class Ship : MonoBehaviour
     public Action OnContainersEnded;
     public void Init(ShipConfig config)
     {
-        // var colors = LevelManager.Instance.ColorManager.ContainerMaterials;
         _config = config;
         _raws = _config.Raws;
         var configColors = GetConfigAvailibleColor(config.AvailibleColors);
@@ -67,7 +66,6 @@ public class Ship : MonoBehaviour
                 }
             }
         }
-
 
         foreach (var place in _containerPlacement)
         {

@@ -42,7 +42,6 @@ public class CarSpawner : MonoBehaviour
             _car = Instantiate(_carPrefab, position, _spawnPoint.rotation).GetComponent<Car>();
             _needCars--;
             _car.Init(place, color);
-            // _car.MoveToParking(place, color);
             OnNewCarCreate?.Invoke(_car);
             StartTimer();
         }

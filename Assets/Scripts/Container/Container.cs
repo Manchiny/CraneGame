@@ -1,6 +1,4 @@
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 using UnityStandardAssets.Water;
 using static ColorManager;
@@ -10,13 +8,13 @@ public class Container : MonoBehaviour
     [SerializeField] private List<ConteinerCarChecker> _carCheckers;
     [SerializeField] private MagnitChecker _magnitChecker;
     [SerializeField] private MeshRenderer _body;
-
-    [HideInInspector] public ContainerColor ContainerColor { get; private set; }
+    [SerializeField] private ExcessContainerChecker _excessContainerChecker;
+    public ContainerColor ContainerColor { get; private set; }
 
     private Ship _ship;
     private CarPlatform _carPlatform;
     private bool _onCar;
-
+    private bool _isWrong;
     public bool OnCar
     {
         get => _onCar;
@@ -27,7 +25,10 @@ public class Container : MonoBehaviour
             if (value == true)
                 CheckForCorrectCollorAndPosition();
             else
+            {
+                RemoveContainerAsWrong(this);
                 _carPlatform = null;
+            }             
         }
     }
 
@@ -47,6 +48,7 @@ public class Container : MonoBehaviour
     {
         _ship = ship;
         SetConteinerColor(color);
+        _excessContainerChecker.gameObject.SetActive(false);
     }
 
     private void OnCollisionEnter(Collision collision)
@@ -84,9 +86,10 @@ public class Container : MonoBehaviour
 
     private bool CheckForCorrectCollorAndPosition()
     {
-        if(ContainerColor != _carPlatform.Car.NeedColor)
+        if (ContainerColor != _carPlatform.Car.NeedColor)
         {
             Debug.Log("Color not correct");
+            AddContainerAsWrong(this);
             return false;
         }
 
@@ -95,11 +98,13 @@ public class Container : MonoBehaviour
             if (checker.IsOnCar == false)
             {
                 Debug.Log("Position not correct");
+                AddContainerAsWrong(this);
                 return false;
             }
         }
 
         Debug.Log("Succes!");
+        RemoveContainerAsWrong(this);
         CompleteLoadig(true);
         return true;
     }
@@ -111,12 +116,15 @@ public class Container : MonoBehaviour
 
         transform.parent = _carPlatform.Car.transform;
         _carPlatform.Car.CopmpleteLoading(isSucces);
+
+        _excessContainerChecker.gameObject.SetActive(true);
+        _excessContainerChecker.Init(this);
     }
 
     public void SetConteinerColor(ContainerColor color)
     {
         Material material = null;
-        if (LevelManager.Instance.ColorManager.ContainerMaterials.TryGetValue(color, out material))
+        if (Game.ColorManager.ContainerMaterials.TryGetValue(color, out material))
         {
             _body.sharedMaterial = material;
             ContainerColor = color;
@@ -134,6 +142,26 @@ public class Container : MonoBehaviour
         _ship?.OnContainerCrush(this);
 
         Debug.Log("OnWater " + ContainerColor);
+    }
+
+    public void AddContainerAsWrong(Container container)
+    {
+        //if (_isWrong)
+        //    return;
+
+        _carPlatform.Car.AddWrongContainer(container);
+    //    _isWrong = true;
+    }
+
+    public void RemoveContainerAsWrong(Container container)
+    {
+        //if (_isWrong == false)
+        //    return;
+
+        if(_carPlatform != null)
+            _carPlatform.Car.RemoveWrongContainer(container);
+
+     //   _isWrong = false;
     }
 }
 

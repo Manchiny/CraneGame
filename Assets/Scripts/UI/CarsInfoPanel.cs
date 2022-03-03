@@ -7,7 +7,7 @@ public class CarsInfoPanel : MonoBehaviour
 {
     [SerializeField] private CarSpawner _carSpawner;
     [Space]
-    [SerializeField] private NeedColorIndicator _needColorPrefab;
+    [SerializeField] private NeedColorIndicatorView _needColorViewPrefab;
     [SerializeField] private RectTransform _content;
 
     private List<GameObject> _indicators;
@@ -33,7 +33,7 @@ public class CarsInfoPanel : MonoBehaviour
 
     private void OnNewCarCreated(Car car)
     {
-        var indicator = Instantiate(_needColorPrefab, _content);
+        var indicator = Instantiate(_needColorViewPrefab, _content);
         indicator.Init(car);
     }
     private void OnDestroy()
