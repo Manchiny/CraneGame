@@ -7,15 +7,12 @@ using UnityEngine;
 public class WindowsController : MonoBehaviour
 {
     [SerializeField] private RectTransform _windowHolder;
+    [SerializeField] private Locker _locker;
+
+    public Locker Locker => _locker;
     public ReactiveProperty<AbstractWindow> CurrentWindow { get; } = new ReactiveProperty<AbstractWindow>(null);
 
-    /// <summary>
-    /// Показывает определенный экран и выполняет над ним действие после иницализации. Если открыт другой экран
-    /// то закрывает текущий и открывает новый. При возврате открывает предыдущий. 
-    /// </summary>
-    /// <typeparam name="T"> Класс экрана для отображения </typeparam>
-    /// <param name="closeAllOther"> Если истина то делает экран первым в истории экранов, предыдущие забываются. </param>
-    /// <param name="action"> Действие выполняемое после инициализации </param>
+    // TODO: Добавить очередь окон, возможность их скрывать и закрывать через параметр closeAllOther
     public T ScreenChange<T>(bool closeAllOther = false, Action<T> action = null) where T : AbstractWindow
     {
         if (closeAllOther)
@@ -34,6 +31,7 @@ public class WindowsController : MonoBehaviour
         {
             window = Instantiate(window, _windowHolder);
             action.Invoke(window);
+          //  CurrentWindow.Value = window;
         }
 
         return window;

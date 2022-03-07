@@ -1,26 +1,29 @@
-using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
-using System;
+using UnityEngine.UI;
 
 public class InfoScreenView : MonoBehaviour
 {
     [SerializeField] private TextMeshProUGUI _cargoAngelText;
+    [SerializeField] private TextMeshProUGUI _shipsText;
+    [SerializeField] private TextMeshProUGUI _crushedContainersText;
 
-    public static InfoScreenView Instance { get; private set; }
-
-    private void Awake()
+    private Magnit _magnit;
+    private int _canCrushContainers;
+    public void Init(Magnit magnit, int shipsCount, int canCrushContainers)
     {
-        if (Instance == null)
-        {
-            Instance = this;
-            return;
-        }
+        if(_magnit != null)
+            _magnit.OnRotationSet -= OnCargoAngelSet;
 
-        Destroy(this);
+        _magnit = magnit;
+        _magnit.OnRotationSet += OnCargoAngelSet;
+
+        SetShipsInfo(canCrushContainers, shipsCount);
+        _canCrushContainers = canCrushContainers;
+        UpdateCrushContainersInfo();
+
     }
-    public void OnCargoAngelSet(bool isLoaded = true, float angel = 0)
+    public void OnCargoAngelSet(bool isLoaded, float angel)
     {
         if (!isLoaded)
         {
@@ -39,4 +42,17 @@ public class InfoScreenView : MonoBehaviour
         }
     }
 
+    public void SetShipsInfo(int currentShipNumber, int shipsCount)
+    {
+        _shipsText.text = $"{currentShipNumber}/{shipsCount}";
+    }
+    public void OnContainerCrush()
+    {
+        _canCrushContainers--;
+        UpdateCrushContainersInfo();
+    }
+    private void UpdateCrushContainersInfo()
+    {
+        _crushedContainersText.text = _canCrushContainers.ToString();
+    }
 }

@@ -10,11 +10,12 @@ public class ParkingManager : MonoBehaviour
     [SerializeField] private CarSpawner _spawner;
     public Transform GetExitPoint() => _exitPoint;
 
-    private List<Car> _activeCars = new List<Car>();
-    private List<Car> _allCarsOnParking = new List<Car>();
-    private Queue<Container> _crushedContainers = new Queue<Container>();
+    private List<Car> _activeCars;
+    private List<Car> _allCarsOnParking;
+    private Queue<Container> _crushedContainers;
 
     private bool _isCrushProcessed;
+    private Ship _ship;
     private void Awake()
     {
         if (Instance == null)
@@ -29,24 +30,31 @@ public class ParkingManager : MonoBehaviour
 
     public void Init()
     {
+        _crushedContainers = new Queue<Container>();
+        _allCarsOnParking = new List<Car>();
+        _activeCars = new List<Car>();
+
+        _isCrushProcessed = false;
         InitParkingPlaces();
-        _spawner.Init(OnNewCarCreated);
+        _spawner.Init(OnNewCarCreated);     
     }
 
     public void SubscribeOnCrush(Ship ship)
     {
-        ship.OnCrush += OnContainerCrush;
+        _ship = ship;
+        _ship.OnCrush += OnContainerCrush;
     }
     private void InitParkingPlaces()
     {
         for (int i = 0; i < _parkingPlaces.Length; i++)
         {
             _parkingPlaces[i].Id = i;
+            _parkingPlaces[i].SetCar(null);
         }
     }
     private void OnContainerCrush(Container container)
     {
-        _crushedContainers.Enqueue(container);
+      _crushedContainers.Enqueue(container);
 
         if (_isCrushProcessed == false)
             ProcessCrushConteiner();
@@ -56,28 +64,36 @@ public class ParkingManager : MonoBehaviour
         if (_crushedContainers.Count <= 0)
             return;
 
-        _isCrushProcessed = true;
-        Car matchedColorCar = null;
-        Container container = _crushedContainers.Dequeue();
-
-        foreach (var car in _activeCars)
+        bool canContinue = Game.LevelManager.OnContainerCrush();
+        
+        if(canContinue)
         {
-            if (container.ContainerColor == car.NeedColor)
+            Container container = _crushedContainers.Dequeue();
+            _ship.RemoveContainer(container);
+
+            _isCrushProcessed = true;
+            Car matchedColorCar = null;
+
+            foreach (var car in _activeCars)
             {
-                matchedColorCar = car;
-                continue;
+                if (container.ContainerColor == car.NeedColor)
+                {
+                    matchedColorCar = car;
+                    continue;
+                }
             }
+
+            if (matchedColorCar != null)
+            {
+                matchedColorCar.OnContainerCrush();
+            }
+
+            _isCrushProcessed = false;
+
+            if (_crushedContainers.Count > 0)
+                OnContainerCrush(_crushedContainers.Peek());
         }
-
-        if (matchedColorCar != null)
-        {
-            matchedColorCar.OnContainerCrush();
-        }
-
-        _isCrushProcessed = false;
-
-        if (_crushedContainers.Count > 0)
-            OnContainerCrush(_crushedContainers.Peek());
+        
     }
 
     public void OnNewCarCreated(Car car)

@@ -4,8 +4,8 @@ using UnityEngine.SceneManagement;
 
 public class MainScene : MonoBehaviour
 {
-
     private const int GAME_SCENE_ID = 1;
+
     [SerializeField] private LoaderWindow _window;
 
     private void Start()

@@ -27,16 +27,17 @@ public class Car : MonoBehaviour
     private CompositeDisposable _disposeMove = new CompositeDisposable();
     public bool IsComplete { get; private set; }
     public bool IsWayFree { get; private set; } = true;
-    public bool IsWrongContainer { get; private set; }
     private HashSet<Container> _wrongContainers = new HashSet<Container>();
     public bool HasWrongsContainers => _wrongContainers.Count > 0;
 
     public Action<Car> OnMoveExit;
     public Action<Car, bool> OnCompleteLoading;
     public Action<ContainerColor> OnColorSet;
-
+    public Action CheckNotify;
     public void Init(ParkingPlace place, ContainerColor needColor)
     {
+        Game.LevelLoader.OnExitLevel += OnLevelExit;
+
         _obstacleChecker.Init(this);
         NeedColor = needColor;
         MoveToParking(place);
@@ -110,20 +111,20 @@ public class Car : MonoBehaviour
     }
     private void SetColorSignal(ContainerColor color)
     {
-        Material material = LevelManager.Instance.GetSignalMaterial(color);
+        Material material = Game.LevelManager.GetSignalMaterial(color);
         _colorSignal.sharedMaterial = material;
     }
 
     public void OnContainerCrush()
     {
-        var constructor = LevelManager.Instance;
-        bool isHasAvailibleColorContainer = constructor.HasAvailibleColor(NeedColor);
+        var levelManager = Game.LevelManager;
+        bool isHasAvailibleColorContainer = levelManager.HasAvailibleColor(NeedColor);
 
         if (isHasAvailibleColorContainer == false) // если ожидаемого цвета контейнеров больше нет - получаем новый
         {
-            if (constructor.HasAvailibleColors() == true && constructor.HasAvailibleContainers() == true)
+            if (levelManager.HasAvailibleColors() == true && levelManager.HasAvailibleContainers() == true)
             {
-                NeedColor = constructor.GetRandomAvailibleContainerColor();
+                NeedColor = levelManager.GetRandomAvailibleContainerColor();
             }
             else
             {
@@ -134,16 +135,30 @@ public class Car : MonoBehaviour
 
     public void SetFreeWay(bool value)
     {
-        IsWayFree = value;      
+        IsWayFree = value;
+        CheckNotify?.Invoke();
     }
 
     public void AddWrongContainer(Container container)
     {
         _wrongContainers.Add(container);
+        CheckNotify?.Invoke();
     }
 
     public void RemoveWrongContainer(Container container)
     {
         _wrongContainers.Remove(container);
+        CheckNotify?.Invoke();
+    }
+
+    private void OnDestroy()
+    {
+        Game.LevelLoader.OnExitLevel -= OnLevelExit;
+        _disposeMove.Clear();
+    }
+
+    private void OnLevelExit()
+    {
+        Destroy(gameObject);
     }
 }

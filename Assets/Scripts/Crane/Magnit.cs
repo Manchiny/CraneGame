@@ -1,41 +1,59 @@
+using DG.Tweening;
+using RSG;
 using System;
 using System.Collections;
+using UniRx;
 using UnityEngine;
 
 public class Magnit : MonoBehaviour
 {
-    public Crane crane;
-    private Container _conteiner; //{ get; private set; }
-    private MagnitChecker checker;
+    private const float MAGNETYZE_ANIMATION_TIME = 0.1f;
+    private const float CONTAINERS_WIDTH = 3f;
+    private const float ADDITIONAl_HEIGHT_ON_MAGNETYZE = 0.35f;
 
-    public Action OnMagnityze;
-    public Action OnFree;
+    private Crane _crane;
+    private Container _conteiner;
+
+    private Sequence _sequence;
+    public bool IsFreezed { get; private set; }
+    private bool _inProcess;
+    public Action<bool, float> OnRotationSet;
+    public void Init(Crane cran)
+    {
+        _crane = cran;
+        Free();
+        _conteiner = null;
+        IsFreezed = false;
+        _inProcess = false;
+    }
     public void Free()
     {
-        if (_conteiner != null)
+        if (_conteiner != null && _inProcess == false)
         {
-            OnFree?.Invoke();
-            InfoScreenView.Instance.OnCargoAngelSet(false);
+            IsFreezed = true;
+            _sequence?.Kill();
+            _inProcess = true;
 
-            checker = _conteiner.GetComponentInChildren<MagnitChecker>();
-            checker.SetStatus(false);
+            OnRotationSet?.Invoke(false, 0);
 
             _conteiner.transform.parent = null;
-            var rigidbody = _conteiner.gameObject.AddComponent<Rigidbody>();
-            rigidbody.mass = 500;
-            rigidbody.useGravity = true;
-            rigidbody.isKinematic = false;
+            _conteiner.AddRigidbody();
             _conteiner.SetMagnitizeStatus(false);
 
-            StartCoroutine(UnfreezeChecker());
+            _crane.Controller.StartForceMagnitUp(0.4f, OnComplete);
+
+            void OnComplete()
+            {
+                Unfreeze();
+            }
         }
     }
 
-    IEnumerator UnfreezeChecker()
+    private void Unfreeze()
     {
-        yield return new WaitForSeconds(2f);
-        checker.SetStatus(true);
+        IsFreezed = false;
         _conteiner = null;
+        _inProcess = false;
     }
 
     private void OnTriggerEnter(Collider other)
@@ -53,18 +71,21 @@ public class Magnit : MonoBehaviour
 
     private void OnCollisionEnter(Collision collision)
     {
-        crane.IsDownMoveFreeze = true;
+        _crane.IsDownMoveFreeze = true;
     }
     private void OnCollisionExit(Collision collision)
     {
-        crane.IsDownMoveFreeze = false;
+        _crane.IsDownMoveFreeze = false;
     }
 
     private void Magnetize(GameObject container, MagnitChecker checker)
     {
-        OnMagnityze?.Invoke();
+        if (IsFreezed)
+            return;
 
-        crane.IsDownMoveFreeze = true;
+        _inProcess = false;
+
+        _crane.IsDownMoveFreeze = true;
         _conteiner = container.GetComponent<Container>();
         _conteiner.SetMagnitizeStatus(true);
 
@@ -74,36 +95,36 @@ public class Magnit : MonoBehaviour
             Destroy(contRigidbody);
         }
 
-        crane.Joint.connectedBody = null;
+        _crane.Joint.connectedBody = null;
         var magnitRiggidbody = GetComponent<Rigidbody>();
         magnitRiggidbody.isKinematic = true;
-
-        container.transform.position += new Vector3(0, 0.25f, 0);
-        var contRotation = container.transform.rotation;
-        contRotation.x = 0;
-        container.transform.rotation = contRotation; // выравниваем вращение контейнера по горизонту
-
+        var collider = GetComponent<Collider>();
         transform.rotation = Quaternion.identity;
-        transform.position = container.transform.position;
+        collider.isTrigger = true;
+        ContainerAttachAnim(_conteiner)
+            .Then(() =>
+            {
+                collider.isTrigger = false;
+                transform.position = container.transform.position;
 
-        crane.Joint.autoConfigureConnectedAnchor = true;
-        crane.Joint.connectedBody = magnitRiggidbody;
+                _crane.Joint.autoConfigureConnectedAnchor = true;
+                _crane.Joint.connectedBody = magnitRiggidbody;
 
-        var anchors = crane.Joint.connectedAnchor;
-        anchors.x = 0;
-        anchors.z = 0;
+                var anchors = _crane.Joint.connectedAnchor;
+                anchors.x = 0;
+                anchors.z = 0;
 
-        checker.gameObject.GetComponent<MagnitChecker>().SetStatus(false);
+                container.transform.parent = this.transform;
+                magnitRiggidbody.isKinematic = false;
+                _crane.Joint.autoConfigureConnectedAnchor = false;
+                _crane.Joint.connectedAnchor = anchors;
 
-        container.transform.parent = this.transform;
-        magnitRiggidbody.isKinematic = false;
-        crane.Joint.autoConfigureConnectedAnchor = false;
-        crane.Joint.connectedAnchor = anchors;
+                _crane.IsDownMoveFreeze = false;
 
-        crane.IsDownMoveFreeze = false;
-
-        float y = _conteiner.transform.localRotation.eulerAngles.y;
-        InfoScreenView.Instance.OnCargoAngelSet(angel: y);
+                float y = _conteiner.transform.localRotation.eulerAngles.y;
+                OnRotationSet?.Invoke(true, y);
+            }
+            );
     }
 
     public void Rotate(float speed)
@@ -113,7 +134,33 @@ public class Magnit : MonoBehaviour
 
         _conteiner.transform.Rotate(Vector3.up * speed * Time.deltaTime);
         float y = _conteiner.transform.localRotation.eulerAngles.y;
-        InfoScreenView.Instance.OnCargoAngelSet(angel: y);
+        OnRotationSet?.Invoke(true, y);
+    }
+
+    private IPromise ContainerAttachAnim(Container container)
+    {
+        Promise promise = new Promise();
+
+        _sequence?.Kill();
+        _sequence.SetLink(container.gameObject);
+        _sequence = DOTween.Sequence();
+        var contTransform = container.transform;
+
+        var addHeight = ADDITIONAl_HEIGHT_ON_MAGNETYZE;
+        var contRotation = contTransform.rotation.eulerAngles;
+        if (contRotation.x > 45 && contRotation.x < 315 || contRotation.x < -45 && contRotation.x > -225)
+            addHeight += CONTAINERS_WIDTH / 2;
+
+        contRotation.x = 0;
+        contRotation.z = 0;
+
+        _sequence.Append(contTransform.DOMoveY(contTransform.position.y + addHeight, MAGNETYZE_ANIMATION_TIME));
+        _sequence.Join(contTransform.DORotate(contRotation, MAGNETYZE_ANIMATION_TIME));
+
+        _sequence.Play()
+            .OnComplete(() => promise.Resolve());
+
+        return promise;
     }
 }
 

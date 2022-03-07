@@ -1,5 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
+using System;
 using UnityEngine;
 
 public class Crane : MonoBehaviour
@@ -7,15 +6,30 @@ public class Crane : MonoBehaviour
     [SerializeField] private ConfigurableJoint _joint;
     [SerializeField] private Magnit _magnit;
     [SerializeField] private CableRender _cable;
+    [SerializeField] private CraneController _craneController;
 
-    public bool IsDownMoveFreeze = false;
+    public CraneController Controller => _craneController;
+    public ConfigurableJoint Joint => _joint;
+    public Magnit Magnit => _magnit;
 
-    private void Awake()
+    private bool _isHeightFreeze;
+    public bool IsDownMoveFreeze
     {
-        _magnit.crane = this;
+        get => _isHeightFreeze;
+        set
+        {
+            _isHeightFreeze = value;
+            if (value == true)
+                OnDawnMoveFreeze?.Invoke();
+        }
+    }
+    public Action OnDawnMoveFreeze;
+    public void Init()
+    {
+        _magnit.Init(this);
+        _craneController.Init(this);
+        IsDownMoveFreeze = false;
     }
 
-    public ConfigurableJoint Joint { get => _joint; }
-    public Magnit Magnit { get => _magnit; }
 
 }

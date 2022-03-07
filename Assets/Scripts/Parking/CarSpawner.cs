@@ -5,21 +5,26 @@ using static ColorManager;
 
 public class CarSpawner : MonoBehaviour
 {
+    private const float COOLDAWN = 2f;
+
     [SerializeField] private Car _carPrefab;
     [SerializeField] private Transform _spawnPoint;
 
     private ParkingManager _parkingManager;
 
     private int _needCars = 3;
-    private const float COOLDAWN = 2f;
     private float _timer;
-    private CompositeDisposable _timerDispose = new CompositeDisposable();
+    private CompositeDisposable _timerDispose;
     private Car _car = null;
 
     public Action<Car> OnNewCarCreate;
     public void Init(Action<Car> onCreateCar)
     {
+        _timerDispose = new CompositeDisposable();
+        Game.LevelLoader.OnExitLevel += OnLevelExit;
         _parkingManager = ParkingManager.Instance;
+        _car = null;
+
         OnNewCarCreate += onCreateCar;
 
         _needCars = 3;
@@ -27,14 +32,14 @@ public class CarSpawner : MonoBehaviour
     }
     private void CreateCar()
     {
-        if (LevelManager.Instance.HasAvailibleContainers() == false || LevelManager.Instance.HasAvailibleColors() == false)
+        if (Game.LevelManager.HasAvailibleContainers() == false || Game.LevelManager.HasAvailibleColors() == false)
             return;
 
         var place = _parkingManager.GetFreeParkingPlaceOnEnd();
 
         if (place != null && _needCars > 0)
         {
-            ContainerColor color = LevelManager.Instance.GetRandomAvailibleContainerColor();
+            ContainerColor color = Game.LevelManager.GetRandomAvailibleContainerColor();
 
             var position = _spawnPoint.position;
             position.y = 0;
@@ -84,5 +89,13 @@ public class CarSpawner : MonoBehaviour
             if(_needCars > 0)
                 CreateCar();
         }
+    }
+
+    private void OnLevelExit()
+    {
+        _timerDispose.Clear();
+        _needCars = 0;
+
+        Game.LevelLoader.OnExitLevel -= OnLevelExit;
     }
 }

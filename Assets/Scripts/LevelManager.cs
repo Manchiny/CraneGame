@@ -1,4 +1,5 @@
 using RSG;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using static ColorManager;
@@ -6,57 +7,93 @@ using static LevelConfigs;
 
 public class LevelManager : MonoBehaviour
 {
-    public static LevelManager Instance { get; private set; }
-
     [SerializeField] private ShipSpawner _shipSpawner;
     public LevelConfig LevelConfig { get; private set; }
     public Ship CurrentShip { get; private set; }
     private int _nextShipId;
-    public Color GetConformigSignalColor(ContainerColor color) => Game.ColorManager.GetConformingColor(color);
-    private void Awake()
-    {
-        if (Instance == null)
+
+    private LevelLoader _levelLoader;
+    private GameMainWindow _window;
+    public int CanCrushContainers { get => _canCrushContainers;
+        set
         {
-            Instance = this;
-            DontDestroyOnLoad(gameObject);
-
-            return;
+            _canCrushContainers = value;
         }
-        Destroy(this);
     }
-
-    public IPromise StartLevel(LevelConfig config)
+    private int _canCrushContainers;
+    private bool _isEnded;
+    public IPromise StartLevel(LevelConfig config, LevelLoader loader, GameMainWindow window)
     {
         Promise promise = new Promise();
+        _isEnded = false;
+
+        _window = window;
 
         _nextShipId = 0;
         LevelConfig = config;
+        _levelLoader = loader;
+        _levelLoader.OnLoadingComplete += OnLoadingLevelComplete;
 
-            CreateShipOrLevelComplete()
-            .Then(() => ParkingManager.Instance.Init())
-            .Then(() => promise.Resolve());
+        CanCrushContainers = LevelConfig.MaxContainerCrushes;
+ 
+        CreateShipOrLevelComplete()
+        .Then(() => ParkingManager.Instance.Init())
+        .Then(() => promise.Resolve());
 
         return promise;
     }
 
     private IPromise CreateShipOrLevelComplete()
     {
-        if(_nextShipId < LevelConfig?.ShipConfig?.Length)
+        if (_isEnded == false)
         {
-            CurrentShip = _shipSpawner.CreateShip(LevelConfig.ShipConfig[_nextShipId]);
-            CurrentShip.MoveTo(_shipSpawner.ParkingPoint);
-            _nextShipId++;
-            CurrentShip.OnContainersEnded += OnContainersEnded;
-            ParkingManager.Instance.SubscribeOnCrush(CurrentShip);
-        }
-        else
-        {
-            Debug.Log("Level complete");
-        }
+            if (_nextShipId < LevelConfig?.ShipConfigs?.Length)
+            {
+                CurrentShip = _shipSpawner.CreateShip(LevelConfig.ShipConfigs[_nextShipId]);
+                CurrentShip.MoveTo(_shipSpawner.ParkingPoint);
+                _nextShipId++;
+                CurrentShip.OnContainersEnded += OnContainersEnded;
+                ParkingManager.Instance.SubscribeOnCrush(CurrentShip);
 
+                _window.SetShipsInfo(_nextShipId, LevelConfig.ShipConfigs.Length);
+            }
+            else
+            {
+                LevelComplete();
+            }
+        }
         return Promise.Resolved();
     }
+    private void LevelComplete()
+    {
+        Game.User.SetCurrentLevel();
 
+        LevelCompleteWindow.Of();
+    }
+
+    public bool OnContainerCrush()
+    {
+        bool canContinueGame = true;
+        CanCrushContainers -= 1;
+        _window.UpdateCrushContainersInfo();
+        if (CanCrushContainers < 0)
+        {
+            canContinueGame = false;
+            LevelFailed();
+        }
+
+        return canContinueGame;
+    }
+    private void LevelFailed()
+    {
+        if (_isEnded)
+            return;
+
+        _isEnded = true;
+        LevelFailedWindow.Of();
+    }
+
+    public Color GetConformigSignalColor(ContainerColor color) => Game.ColorManager.GetConformingColor(color);
     public ContainerColor GetRandomAvailibleContainerColor()
     {
         var shipColors = CurrentShip.AvailibleCollors;
@@ -68,7 +105,7 @@ public class LevelManager : MonoBehaviour
         }
 
         int count = availibleCollors.Count;
-        int random = Random.Range(0, count);
+        int random = UnityEngine.Random.Range(0, count);
         ContainerColor randomColor = availibleCollors[random];
         CurrentShip.RemoveAvailibleColorsCount(randomColor);
         return randomColor;
@@ -108,9 +145,14 @@ public class LevelManager : MonoBehaviour
         CreateShipOrLevelComplete();
     }
 
-    public void ExitLevel()
+    private void OnLoadingLevelComplete()
     {
-
+        _levelLoader.OnLoadingComplete -= OnLoadingLevelComplete;
     }
-
+    public void ExitLevel(Action onComplete)
+    {
+        _levelLoader.ExitLevel(onComplete);
+    }
 }
+
+

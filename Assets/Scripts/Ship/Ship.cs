@@ -7,22 +7,27 @@ using static LevelConfigs;
 
 public class Ship : MonoBehaviour
 {
+    private const float CONTAINER_HEIGHT = 3f;
+
     [SerializeField] private List<Transform> _containerPlacement;
     [SerializeField] private Transform _containerHolder;
     [SerializeField] private GameObject _containerPrefab;
     [SerializeField] private MeshFilter _shipBody;
     [SerializeField] private float _parkingMoveTime;
-
-    private ShipConfig _config;
-    private int _raws = 2;
-    private const float CONTAINER_HEIGHT = 3f;
-    public List<Container> Containers { get; private set; } = new List<Container>();
+    [Space]
+    [SerializeField] private AnimationCurve _moveSpeedCurve;
+    public List<Container> Containers { get; private set; }
     public MeshFilter ShipBody => _shipBody;
     public Dictionary<ContainerColor, int> AvailibleCollors { get; private set; }
     public Action<Container> OnCrush;
     public Action OnContainersEnded;
+
+    private ShipConfig _config;
+    private int _raws = 2;
     public void Init(ShipConfig config)
     {
+        Containers = new List<Container>();
+        Game.LevelLoader.OnExitLevel += OnExitLevel;
         _config = config;
         _raws = _config.Raws;
         var configColors = GetConfigAvailibleColor(config.AvailibleColors);
@@ -34,7 +39,6 @@ public class Ship : MonoBehaviour
 
         InitContainers(configColors, config.StronglyCount());
     }
-
     private void InitContainers(Dictionary<ContainerColor, int> availableColors, int stronglyCount)
     {
         var newAvailableColors = availableColors;
@@ -143,6 +147,17 @@ public class Ship : MonoBehaviour
     public void MoveTo(Transform targetPoint)
     {
         var position = targetPoint.position;
-        transform.DOMoveZ(targetPoint.position.z, _parkingMoveTime, false);
+        transform.DOMoveZ(targetPoint.position.z, _parkingMoveTime, false)
+            .SetEase(Ease.InOutQuad)
+            .SetLink(gameObject);
+    }
+
+    private void OnDestroy()
+    {
+        Game.LevelLoader.OnExitLevel -= OnExitLevel;
+    }
+    private void OnExitLevel()
+    {
+        Destroy(gameObject);
     }
 }

@@ -1,5 +1,7 @@
+using DG.Tweening;
+using System;
+using UniRx;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class CraneController : MonoBehaviour
 {
@@ -10,6 +12,7 @@ public class CraneController : MonoBehaviour
     [SerializeField] private Vector3 _moveVector = new Vector3(0, 0, 1);
 
     [Space]
+    [SerializeField] private Transform _arrow1;
     [SerializeField] private Transform _arrow2;
     [SerializeField] private Transform _arrow3;
 
@@ -18,26 +21,44 @@ public class CraneController : MonoBehaviour
     [SerializeField] private float _minMagnitY = 0f;
     [SerializeField] private float _maxMagnitY = 13f;
 
-    [Space]
-    [SerializeField] private Button _detachBtn;
-
     private Crane _crane;
     private Magnit _magnit;
+    private Vector3 _cranStartPosition;
     public Magnit Magnit { get => _magnit; }
     public Rigidbody JointRB { get; private set; }
     public Rigidbody MagnitRB { get; private set; }
-    private void Awake()
+    private IDisposable _forceDispose;
+    private bool _isHeightBlocked;
+    public void Init(Crane crane)
     {
-        _crane = GetComponent<Crane>();
-        _magnit = _crane.Magnit;
         JointRB = _joint.GetComponent<Rigidbody>();
+        _crane = crane;
+        _magnit = _crane.Magnit;
         MagnitRB = _magnit.GetComponent<Rigidbody>();
+
+        if (_cranStartPosition == null)
+            _cranStartPosition = crane.transform.position;
+        else
+            crane.transform.position = _cranStartPosition;
+
+        _joint.autoConfigureConnectedAnchor = false;
+        Reset();
     }
 
-    private void Start()
+    private void Reset()
     {
-        _joint.autoConfigureConnectedAnchor = false;
-        _detachBtn.onClick.AddListener(OnButtonDetachClick);
+        _magnit.Init(_crane);
+        _isHeightBlocked = false;
+
+        _arrow3.transform.localPosition = new Vector3(0.1f, 0, 0);
+        _arrow2.transform.localPosition = new Vector3(0.1f, 0, 0);
+        _arrow1.transform.localPosition = new Vector3(0, 0, 0);
+
+
+        JointRB.WakeUp();
+        MagnitRB.WakeUp();
+
+        _joint.connectedAnchor = new Vector3(0, 3, 0);
     }
     public void ArrowMove(float vertical)
     {
@@ -56,6 +77,10 @@ public class CraneController : MonoBehaviour
         {
             _arrow3.Translate(new Vector3(1, 0, 0) * _arrowSpeed * factor * Time.deltaTime);
         }
+        else if (_arrow1.localPosition.x < 0.99f)
+        {
+            _arrow1.Translate(new Vector3(1, 0, 0) * _arrowSpeed * factor * Time.deltaTime);
+        }
     }
 
     private void ArrowShorten(float factor = -1)
@@ -68,13 +93,18 @@ public class CraneController : MonoBehaviour
         {
             _arrow2.Translate(new Vector3(1, 0, 0) * _arrowSpeed * factor * Time.deltaTime);
         }
+        else if (_arrow1.localPosition.x > -1f)
+        {
+            _arrow1.Translate(new Vector3(1, 0, 0) * _arrowSpeed * factor * Time.deltaTime);
+        }
     }
 
 
     public void SetMagnitHeigh(float factor)
     {
-        JointRB.WakeUp();
-        MagnitRB.WakeUp();
+        if (_isHeightBlocked)
+            return;
+
         if (factor <= 0)
             MagnitDown(factor);
         else if (factor >= 0)
@@ -82,18 +112,28 @@ public class CraneController : MonoBehaviour
     }
     private void MagnitUp(float factor = -1)
     {
-        Vector3 moveVector = new Vector3(0, _cableSpeed, 0) * Time.deltaTime * factor;
-
         if (_joint.connectedAnchor.y > _minMagnitY)
+        {
+            JointRB.WakeUp();
+            MagnitRB.WakeUp();
+
+            Vector3 moveVector = new Vector3(0, _cableSpeed, 0) * Time.deltaTime * factor;
             _joint.connectedAnchor -= moveVector;
+        }
+            
     }
 
     private void MagnitDown(float factor = 1)
     {
-        Vector3 moveVector = new Vector3(0, _cableSpeed, 0) * Time.deltaTime * factor;
-
         if (_joint.connectedAnchor.y < _maxMagnitY && _crane.IsDownMoveFreeze == false)
+        {
+            JointRB.WakeUp();
+            MagnitRB.WakeUp();
+
+            Vector3 moveVector = new Vector3(0, _cableSpeed, 0) * Time.deltaTime * factor;
             _joint.connectedAnchor -= moveVector;
+        }
+           
     }
 
     public void MoveSide(float horizontal)
@@ -108,9 +148,32 @@ public class CraneController : MonoBehaviour
             _magnit.Rotate(_magnitRotationSpeed * factor);
         }          
     }
-
-    private void OnButtonDetachClick()
+    public void StartForceMagnitUp(float deltaHeight, Action onComplete)
     {
-        _magnit.Free();
+        _isHeightBlocked = true;
+
+        float height = (_joint.connectedAnchor.y - deltaHeight > _minMagnitY)
+            ? _joint.connectedAnchor.y - deltaHeight
+            : _minMagnitY;
+
+        _forceDispose = ForceSetHeightUp(height, onComplete);
+    }
+    private void ForceMagnitUp(float needHeight, Action onComplete)
+    {
+        if (_joint.connectedAnchor.y > needHeight)
+            MagnitUp(1);
+        else
+        {
+            _forceDispose.Dispose();
+            onComplete.Invoke();
+            _isHeightBlocked = false;
+        }
+    }
+    private IDisposable ForceSetHeightUp(float needHeight, Action onComplete)
+    {
+        return Observable.EveryUpdate().Subscribe(_ =>
+        {
+            ForceMagnitUp(needHeight, onComplete);
+        }).AddTo(this);
     }
 }

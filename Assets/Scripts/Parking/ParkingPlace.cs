@@ -19,6 +19,5 @@ public class ParkingPlace : MonoBehaviour
         {
             OnFree?.Invoke();
         }
-            
     }
 }

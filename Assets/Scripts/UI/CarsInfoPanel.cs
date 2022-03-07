@@ -1,36 +1,22 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class CarsInfoPanel : MonoBehaviour
 {
-    [SerializeField] private CarSpawner _carSpawner;
-    [Space]
     [SerializeField] private NeedColorIndicatorView _needColorViewPrefab;
     [SerializeField] private RectTransform _content;
 
+    private CarSpawner _carSpawner;
     private List<GameObject> _indicators;
 
-    private void Awake()
+    public void Init()
     {
+        if (_carSpawner != null)
+            _carSpawner.OnNewCarCreate -= OnNewCarCreated;
+
+        _carSpawner = FindObjectOfType<CarSpawner>();
         _carSpawner.OnNewCarCreate += OnNewCarCreated;
     }
-    public void AddColorIndicator()
-    {
-
-    }
-
-    private void SetIndicatorColor()
-    {
-
-    }
-
-    private void OnCarSetColor()
-    {
-
-    }
-
     private void OnNewCarCreated(Car car)
     {
         var indicator = Instantiate(_needColorViewPrefab, _content);

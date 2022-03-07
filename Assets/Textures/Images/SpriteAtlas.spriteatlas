@@ -1,0 +1,55 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!687078895 &4343727234628468602
+SpriteAtlas:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: SpriteAtlas
+  m_EditorData:
+    serializedVersion: 2
+    textureSettings:
+      serializedVersion: 2
+      anisoLevel: 1
+      compressionQuality: 50
+      maxTextureSize: 2048
+      textureCompression: 0
+      filterMode: 1
+      generateMipMaps: 0
+      readable: 0
+      crunchedCompression: 0
+      sRGB: 1
+    platformSettings: []
+    packingSettings:
+      serializedVersion: 2
+      padding: 4
+      blockOffset: 1
+      allowAlphaSplitting: 0
+      enableRotation: 0
+      enableTightPacking: 0
+    secondaryTextureSettings: {}
+    variantMultiplier: 1
+    packables:
+    - {fileID: 102900000, guid: b7f9c37d0acdeb14d92ed28931a2504f, type: 3}
+    bindAsDefault: 1
+    isAtlasV2: 0
+    cachedData: {fileID: 0}
+  m_MasterAtlas: {fileID: 0}
+  m_PackedSprites:
+  - {fileID: 21300000, guid: c0bc72c10bceb5a449f067156651c5a6, type: 3}
+  - {fileID: 21300000, guid: 839b84527dbd79a4cbf47afcf2e94ae0, type: 3}
+  - {fileID: 21300000, guid: aed5e6f8d4d56934988d7352dfe4eb0e, type: 3}
+  - {fileID: 21300000, guid: c507b5cb36468ac4886036b453b85a0a, type: 3}
+  - {fileID: 21300000, guid: bfe4983fddd275c4594fa192d6349550, type: 3}
+  - {fileID: 21300000, guid: d1a5687f44737264aa8e046e44158c12, type: 3}
+  m_PackedSpriteNamesToIndex:
+  - Ship
+  - Car
+  - x
+  - Cont
+  - ContainerEmpty
+  - ContainerFullpng
+  m_RenderDataMap: {}
+  m_Tag: SpriteAtlas
+  m_IsVariant: 0

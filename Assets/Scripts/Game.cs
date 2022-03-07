@@ -10,8 +10,16 @@ public class Game : MonoBehaviour
 	[SerializeField] private LevelLoader _levelLoader;
 	public static LevelLoader LevelLoader => Instance._levelLoader;
 
+	[SerializeField] private LevelManager _levelManager;
+	public static LevelManager LevelManager => Instance._levelManager;
+
 	[SerializeField] private ColorManager _colors;
 	public static ColorManager ColorManager => Instance._colors;
+
+	public static Locker Locker => Instance._windowsController.Locker;
+
+	private UserData _userData;
+	public static UserData User => Instance._userData;
 
     private void Awake()
     {
@@ -25,6 +33,7 @@ public class Game : MonoBehaviour
 
 	private void Init()
 	{
+		_userData = new UserData();
 		_colors.Init();
 		MainMenuWindow.Of();
 	}

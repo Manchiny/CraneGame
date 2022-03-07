@@ -4,8 +4,14 @@ using UnityEngine.EventSystems;
 
 public class MoveJoystick : Joystick
 {
-    private CompositeDisposable _craneMoveDispose = new CompositeDisposable();
+    private CompositeDisposable _craneMoveDispose;
 
+    public override void Init(Crane crane)
+    {
+        base.Init(crane);
+        _craneMoveDispose?.Clear();
+        _craneMoveDispose = new CompositeDisposable();
+    }
     public override void OnPointerDown(PointerEventData eventData)
     {
         Observable.EveryUpdate().Subscribe(_ =>
@@ -25,10 +31,10 @@ public class MoveJoystick : Joystick
             pos.x = (pos.x / _joystickBg.rectTransform.rect.size.x);
             pos.y = (pos.y / _joystickBg.rectTransform.rect.size.y);
         }
-        inputVector = new Vector2(pos.x * 2, pos.y * 2);
-        inputVector = (inputVector.magnitude > 1.0f) ? inputVector.normalized : inputVector;
+        _inputVector = new Vector2(pos.x * 2, pos.y * 2);
+        _inputVector = (_inputVector.magnitude > 1.0f) ? _inputVector.normalized : _inputVector;
 
-        _joystick.rectTransform.localPosition = new Vector2(inputVector.x * (_joystickBg.rectTransform.rect.size.x / 2), inputVector.y * (_joystickBg.rectTransform.rect.size.y / 2));
+        _joystick.rectTransform.localPosition = new Vector2(_inputVector.x * (_joystickBg.rectTransform.rect.size.x / 2), _inputVector.y * (_joystickBg.rectTransform.rect.size.y / 2));
     }
 
     public override void OnPointerUp(PointerEventData eventData)
