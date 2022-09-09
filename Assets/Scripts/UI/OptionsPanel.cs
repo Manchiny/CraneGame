@@ -54,6 +54,7 @@ public class OptionsPanel : MonoBehaviour
             .SetLink(gameObject)
             .Append(_rectTransform.DOSizeDelta(sizeVector, force ? 0 : FADE_DURATION))
             .Join(_canvasGroup.DOFade(0, FADE_DURATION));
+
     }
 }
 
