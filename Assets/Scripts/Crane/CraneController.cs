@@ -8,7 +8,7 @@ public class CraneController : MonoBehaviour
     [SerializeField] private float _arrowSpeed = 2f;
     [SerializeField] private float _cableSpeed = 0.02f;
     [SerializeField] private float _magnitRotationSpeed = 75f;
-    [SerializeField] private Vector3 _moveVector = new Vector3(0, 0, 1);
+    [SerializeField] private Vector3 _craneMoveDirection = new Vector3(1, 0, 0);
 
     [Space]
     [SerializeField] private Transform _arrow1;
@@ -19,6 +19,10 @@ public class CraneController : MonoBehaviour
     [SerializeField] private ConfigurableJoint _joint;
     [SerializeField] private float _minMagnitY = 0f;
     [SerializeField] private float _maxMagnitY = 13f;
+
+
+    private const float MaxArrowDistance = 13f;
+    private Vector3 _arrowMoveDirection = new Vector3(0, 0, 1);
 
     private Crane _crane;
     private Magnit _magnit;
@@ -69,7 +73,7 @@ public class CraneController : MonoBehaviour
 
     public void MoveSide(float horizontal)
     {
-        transform.Translate(-_moveVector * _speed * horizontal * Time.deltaTime);
+        transform.Translate(_craneMoveDirection * _speed * horizontal * Time.deltaTime);
     }
 
     public void RotateContainer(float factor = 1)
@@ -95,8 +99,8 @@ public class CraneController : MonoBehaviour
         _magnit.Init(_crane);
         _isHeightBlocked = false;
 
-        _arrow3.transform.localPosition = new Vector3(0.1f, 0, 0);
-        _arrow2.transform.localPosition = new Vector3(0.1f, 0, 0);
+        _arrow3.transform.localPosition = _arrowMoveDirection * 0.1f;
+        _arrow2.transform.localPosition = _arrowMoveDirection * 0.1f;
         _arrow1.transform.localPosition = new Vector3(0, 0, 0);
 
         JointRB.WakeUp();
@@ -107,22 +111,22 @@ public class CraneController : MonoBehaviour
 
     private void ArrowExtend(float factor = 1)
     {
-        if (_arrow2.localPosition.x < 0.99f)
-            _arrow2.Translate(new Vector3(1, 0, 0) * _arrowSpeed * factor * Time.deltaTime);
-        else if (_arrow3.localPosition.x < 0.99f)
-            _arrow3.Translate(new Vector3(1, 0, 0) * _arrowSpeed * factor * Time.deltaTime);
-        else if (_arrow1.localPosition.x < 0.99f)
-            _arrow1.Translate(new Vector3(1, 0, 0) * _arrowSpeed * factor * Time.deltaTime);
+        if (_arrow2.localPosition.z < MaxArrowDistance)
+            _arrow2.Translate(_arrowMoveDirection * _arrowSpeed * factor * Time.deltaTime);
+        else if (_arrow3.localPosition.z < MaxArrowDistance)
+            _arrow3.Translate(_arrowMoveDirection * _arrowSpeed * factor * Time.deltaTime);
+        else if (_arrow1.localPosition.z < MaxArrowDistance/2f)
+            _arrow1.Translate(_arrowMoveDirection * _arrowSpeed * factor * Time.deltaTime);
     }
 
     private void ArrowShorten(float factor = -1)
     {
-        if (_arrow3.localPosition.x > 0.01f)
-            _arrow3.Translate(new Vector3(1, 0, 0) * _arrowSpeed * factor * Time.deltaTime);
-        else if (_arrow2.localPosition.x > 0.01f)
-            _arrow2.Translate(new Vector3(1, 0, 0) * _arrowSpeed * factor * Time.deltaTime);
-        else if (_arrow1.localPosition.x > -1f)
-            _arrow1.Translate(new Vector3(1, 0, 0) * _arrowSpeed * factor * Time.deltaTime);
+        if (_arrow3.localPosition.z > 0.01f)
+            _arrow3.Translate(_arrowMoveDirection * _arrowSpeed * factor * Time.deltaTime);
+        else if (_arrow2.localPosition.z > 0.01f)
+            _arrow2.Translate(_arrowMoveDirection * _arrowSpeed * factor * Time.deltaTime);
+        else if (_arrow1.localPosition.z > -1f)
+            _arrow1.Translate(_arrowMoveDirection * _arrowSpeed * factor * Time.deltaTime);
     }
 
     private void MagnitUp(float factor = -1)
