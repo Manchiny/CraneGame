@@ -7,6 +7,7 @@ public class OutOfUIClickChecker : MonoBehaviour, IPointerEnterHandler, IPointer
 {
     private bool _isOverPanel = false;
     public bool IsOverPanel => _isOverPanel;
+
     public IDisposable CheckMouseOutClick(RectTransform objectTransform, Action onOutClick)
     {
         return Observable.EveryUpdate().Subscribe(_ =>

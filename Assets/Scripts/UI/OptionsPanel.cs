@@ -1,12 +1,10 @@
 using DG.Tweening;
 using System;
-using UniRx;
 using UnityEngine;
-using UnityEngine.EventSystems;
 
 public class OptionsPanel : MonoBehaviour
 {
-    private const float FADE_DURATION = .35f;
+    private const float FadeDuration = .35f;
 
     private RectTransform _rectTransform;
     private Sequence _sequence;
@@ -26,6 +24,7 @@ public class OptionsPanel : MonoBehaviour
         _canvasGroup = GetComponent<CanvasGroup>();
         Hide(true);
     }
+
     public void Show()
     {
         _isActive = true;
@@ -35,8 +34,8 @@ public class OptionsPanel : MonoBehaviour
 
         _sequence?.Complete();
         _sequence = DOTween.Sequence()
-            .Append(_rectTransform.DOSizeDelta(_defaultSize, FADE_DURATION))
-            .Join(_canvasGroup.DOFade(1, FADE_DURATION))
+            .Append(_rectTransform.DOSizeDelta(_defaultSize, FadeDuration))
+            .Join(_canvasGroup.DOFade(1, FadeDuration))
             .SetLink(gameObject);
     }
 
@@ -52,8 +51,8 @@ public class OptionsPanel : MonoBehaviour
         _sequence?.Complete();
         _sequence = DOTween.Sequence()
             .SetLink(gameObject)
-            .Append(_rectTransform.DOSizeDelta(sizeVector, force ? 0 : FADE_DURATION))
-            .Join(_canvasGroup.DOFade(0, FADE_DURATION));
+            .Append(_rectTransform.DOSizeDelta(sizeVector, force ? 0 : FadeDuration))
+            .Join(_canvasGroup.DOFade(0, FadeDuration));
 
     }
 }

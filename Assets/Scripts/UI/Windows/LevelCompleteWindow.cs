@@ -1,17 +1,17 @@
-using RSG;
 using System;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class LevelCompleteWindow : AbstractWindow
 {
-    private const string LOCK_KEY = "LevelCompleteWindow";
-
     [SerializeField] private Button _continurButton;
+
+    private const string LockKey = "LevelCompleteWindow";
 
     OutOfUIClickChecker _outOfUIClickChecker;
     private IDisposable _clickObserver;
-    public static LevelCompleteWindow Of() =>
+
+    public static LevelCompleteWindow Show() =>
                    Game.Windows.ScreenChange<LevelCompleteWindow>(false, w => w.Init());
 
     private void Init()
@@ -22,11 +22,18 @@ public class LevelCompleteWindow : AbstractWindow
         _continurButton.onClick.AddListener(OnContinueClickButton);
     }
 
+    protected override void OnClose()
+    {
+        base.OnClose();
+        _clickObserver.Dispose();
+        Destroy(_outOfUIClickChecker);
+    }
+
     private void OnContinueClickButton()
     {
         _clickObserver.Dispose();
 
-        Game.Locker.Lock(LOCK_KEY);
+        Game.Locker.Lock(LockKey);
 
         CloseAnimated();
         ClosePromise
@@ -34,14 +41,7 @@ public class LevelCompleteWindow : AbstractWindow
 
         void AfterExit()
         {
-            Game.Locker.UnlockAll(LOCK_KEY);
+            Game.Locker.UnlockAll(LockKey);
         }
-    }
-
-    protected override void OnClose()
-    {
-        base.OnClose();
-        _clickObserver.Dispose();
-        Destroy(_outOfUIClickChecker);
     }
 }

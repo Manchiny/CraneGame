@@ -9,7 +9,7 @@ public class ResetedProgressWindow : AbstractWindow
     OutOfUIClickChecker _outOfUIClickChecker;
     private IDisposable _clickObserver;
 
-    public static ResetedProgressWindow Of() =>
+    public static ResetedProgressWindow Show() =>
                 Game.Windows.ScreenChange<ResetedProgressWindow>(false, w => w.Init());
 
     private void Init()

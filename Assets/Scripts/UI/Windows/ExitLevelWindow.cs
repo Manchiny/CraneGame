@@ -4,14 +4,15 @@ using UnityEngine.UI;
 
 public class ExitLevelWindow : AbstractWindow
 {
-    private const string LOCK_KEY = "ExitLevelWindow";
-
     [SerializeField] private Button _yes;
     [SerializeField] private Button _no;
 
+    private const string LockKey = "ExitLevelWindow";
+
     OutOfUIClickChecker _outOfUIClickChecker;
     private IDisposable _clickObserver;
-    public static ExitLevelWindow Of() =>
+
+    public static ExitLevelWindow Show() =>
                    Game.Windows.ScreenChange<ExitLevelWindow>(false, w => w.Init());
 
     private void Init()
@@ -23,16 +24,23 @@ public class ExitLevelWindow : AbstractWindow
         _no.onClick.AddListener(OnButtonNoClick);
     }
 
+    protected override void OnClose()
+    {
+        base.OnClose();
+        _clickObserver.Dispose();
+        Destroy(_outOfUIClickChecker);
+    }
+
     private void OnButtonYesClick()
     {
-        Game.Locker.Lock(LOCK_KEY);
+        Game.Locker.Lock(LockKey);
         CloseAnimated();
         ClosePromise
             .Then(() => Game.LevelManager.ExitLevel(AfterExit));   
         
         void AfterExit()
         {
-            Game.Locker.Unlock(LOCK_KEY);
+            Game.Locker.Unlock(LockKey);
         }
     }
 
@@ -46,11 +54,5 @@ public class ExitLevelWindow : AbstractWindow
     {
         _yes.onClick.RemoveAllListeners();
         _no.onClick.RemoveAllListeners();
-    }
-    protected override void OnClose()
-    {
-        base.OnClose();
-        _clickObserver.Dispose();
-        Destroy(_outOfUIClickChecker);
     }
 }

@@ -22,7 +22,7 @@ public class RotateJoystick : Joystick
     {
         Observable.EveryUpdate().Subscribe(_ =>
         {
-            _controller.RotateContainer(Horizontal());
+            Controller.RotateContainer(Horizontal());
         }).AddTo(_dispose);
 
         base.OnPointerDown(eventData);
@@ -35,10 +35,10 @@ public class RotateJoystick : Joystick
             pos.x = (pos.x / _joystickBg.rectTransform.rect.size.x);
             //pos.y = (pos.y / _joystickBg.rectTransform.rect.size.y);
         }
-        _inputVector = new Vector2(pos.x * 2, 0);
-        _inputVector = (_inputVector.magnitude > 1.0f) ? _inputVector.normalized : _inputVector;
+        InputVector = new Vector2(pos.x * 2, 0);
+        InputVector = (InputVector.magnitude > 1.0f) ? InputVector.normalized : InputVector;
 
-        _joystick.rectTransform.localPosition = new Vector2(_inputVector.x * (_joystickBg.rectTransform.rect.size.x / 2), _inputVector.y);
+        _joystick.rectTransform.localPosition = new Vector2(InputVector.x * (_joystickBg.rectTransform.rect.size.x / 2), InputVector.y);
     }
 
     public override void OnPointerUp(PointerEventData eventData)

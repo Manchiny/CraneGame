@@ -1,6 +1,5 @@
 using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class InfoScreenView : MonoBehaviour
 {
@@ -10,19 +9,21 @@ public class InfoScreenView : MonoBehaviour
 
     private Magnit _magnit;
     private int _canCrushContainers;
+
     public void Init(Magnit magnit, int shipsCount, int canCrushContainers)
     {
         if(_magnit != null)
-            _magnit.OnRotationSet -= OnCargoAngelSet;
+            _magnit.RotationChanged -= OnCargoAngelSet;
 
         _magnit = magnit;
-        _magnit.OnRotationSet += OnCargoAngelSet;
+        _magnit.RotationChanged += OnCargoAngelSet;
 
         SetShipsInfo(canCrushContainers, shipsCount);
         _canCrushContainers = canCrushContainers;
         UpdateCrushContainersInfo();
 
     }
+
     public void OnCargoAngelSet(bool isLoaded, float angel)
     {
         if (!isLoaded)

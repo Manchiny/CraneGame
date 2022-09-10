@@ -9,7 +9,8 @@ public class NoMoreLevelsWindow : AbstractWindow
 
     OutOfUIClickChecker _outOfUIClickChecker;
     private IDisposable _clickObserver;
-    public static NoMoreLevelsWindow Of() =>
+
+    public static NoMoreLevelsWindow Show() =>
                    Game.Windows.ScreenChange<NoMoreLevelsWindow>(false, w => w.Init());
 
     private void Init()
@@ -21,11 +22,18 @@ public class NoMoreLevelsWindow : AbstractWindow
         _buttonCancel.onClick.AddListener(OnButtonCancelClick);
     }
 
+    protected override void OnClose()
+    {
+        base.OnClose();
+        _clickObserver.Dispose();
+        Destroy(_outOfUIClickChecker);
+    }
+
     private void OnButtonYesClick()
     {
         CloseAnimated();
         ClosePromise
-            .Then(() => ConfirmWindow.Of(() => Game.User.ResetLevel()));
+            .Then(() => ConfirmWindow.Show(() => Game.User.ResetLevel()));
     }
 
     private void OnButtonCancelClick()
@@ -39,10 +47,5 @@ public class NoMoreLevelsWindow : AbstractWindow
         _buttonReset.onClick.RemoveAllListeners();
         _buttonCancel.onClick.RemoveAllListeners();
     }
-    protected override void OnClose()
-    {
-        base.OnClose();
-        _clickObserver.Dispose();
-        Destroy(_outOfUIClickChecker);
-    }
+
 }

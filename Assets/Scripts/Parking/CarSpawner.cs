@@ -5,51 +5,32 @@ using static ColorManager;
 
 public class CarSpawner : MonoBehaviour
 {
-    private const float COOLDAWN = 2f;
-
     [SerializeField] private Car _carPrefab;
     [SerializeField] private Transform _spawnPoint;
+ 
+    private const float Cooldawn = 2f;
 
     private ParkingManager _parkingManager;
 
     private int _needCars = 3;
     private float _timer;
+    
     private CompositeDisposable _timerDispose;
     private Car _car = null;
 
-    public Action<Car> OnNewCarCreate;
+    public event Action<Car> NewCarCreated;
+
     public void Init(Action<Car> onCreateCar)
     {
         _timerDispose = new CompositeDisposable();
-        Game.LevelLoader.OnExitLevel += OnLevelExit;
-        _parkingManager = ParkingManager.Instance;
+        Game.LevelLoader.LevelExited += OnLevelExit;
+        _parkingManager = Game.LevelManager.ParkingManager;
         _car = null;
 
-        OnNewCarCreate += onCreateCar;
+        NewCarCreated += onCreateCar;
 
         _needCars = 3;
         CreateCar();
-    }
-    private void CreateCar()
-    {
-        if (Game.LevelManager.HasAvailibleContainers() == false || Game.LevelManager.HasAvailibleColors() == false)
-            return;
-
-        var place = _parkingManager.GetFreeParkingPlaceOnEnd();
-
-        if (place != null && _needCars > 0)
-        {
-            ContainerColor color = Game.LevelManager.GetRandomAvailibleContainerColor();
-
-            var position = _spawnPoint.position;
-            position.y = 0;
-
-            _car = Instantiate(_carPrefab, position, _spawnPoint.rotation).GetComponent<Car>();
-            _needCars--;
-            _car.Init(place, color);
-            OnNewCarCreate?.Invoke(_car);
-            StartTimer();
-        }
     }
 
     public void AddCarToQueue()
@@ -65,12 +46,36 @@ public class CarSpawner : MonoBehaviour
             _needCars++;
         }
     }
+
+    private void CreateCar()
+    {
+        if (Game.LevelManager.HasAvailibleContainers == false || Game.LevelManager.HasAvailibleColors() == false)
+            return;
+
+        var place = _parkingManager.GetFreeParkingPlaceOnEnd();
+
+        if (place != null && _needCars > 0)
+        {
+            ContainerColor color = Game.LevelManager.GetRandomAvailibleContainerColor();
+
+            var position = _spawnPoint.position;
+            position.y = 0;
+
+            _car = Instantiate(_carPrefab, position, _spawnPoint.rotation).GetComponent<Car>();
+            _needCars--;
+            _car.Init(place, color);
+            NewCarCreated?.Invoke(_car);
+            StartTimer();
+        }
+    }
+
+
     private void StartTimer()
     {
         if (_timerDispose.Count > 0)
             return;
 
-        _timer = COOLDAWN;
+        _timer = Cooldawn;
 
         Observable.EveryUpdate().Subscribe(_ =>
         {
@@ -96,6 +101,6 @@ public class CarSpawner : MonoBehaviour
         _timerDispose.Clear();
         _needCars = 0;
 
-        Game.LevelLoader.OnExitLevel -= OnLevelExit;
+        Game.LevelLoader.LevelExited -= OnLevelExit;
     }
 }

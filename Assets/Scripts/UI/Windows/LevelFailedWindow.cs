@@ -1,14 +1,13 @@
-using System;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class LevelFailedWindow : AbstractWindow
 {
-    private const string LOCK_KEY = "LevelFailedWindow";
-
     [SerializeField] private Button _continurButton;
 
-    public static LevelFailedWindow Of() =>
+    private const string LockKey = "LevelFailedWindow";
+
+    public static LevelFailedWindow Show() =>
                    Game.Windows.ScreenChange<LevelFailedWindow>(false, w => w.Init());
 
     private void Init()
@@ -18,7 +17,7 @@ public class LevelFailedWindow : AbstractWindow
 
     private void OnContinueClickButton()
     {
-        Game.Locker.Lock(LOCK_KEY);
+        Game.Locker.Lock(LockKey);
         _continurButton.onClick.RemoveAllListeners();
 
         CloseAnimated();
@@ -27,7 +26,7 @@ public class LevelFailedWindow : AbstractWindow
 
         void AfterExit()
         {
-            Game.Locker.UnlockAll(LOCK_KEY);
+            Game.Locker.UnlockAll(LockKey);
         }
     }
 }

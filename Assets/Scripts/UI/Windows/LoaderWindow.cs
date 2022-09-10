@@ -17,6 +17,7 @@ public class LoaderWindow : MonoBehaviour
     {
         _progressBar.value = Mathf.Lerp(_progressBar.value, progress, 2 * Time.deltaTime);
     }
+
     public float GetProgessBarValue()
     {
         return _progressBar.value;

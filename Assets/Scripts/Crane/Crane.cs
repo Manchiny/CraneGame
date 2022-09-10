@@ -19,11 +19,14 @@ public class Crane : MonoBehaviour
         set
         {
             _isHeightFreeze = value;
+
             if (value == true)
-                OnDawnMoveFreeze?.Invoke();
+                DawnMoveFreezed?.Invoke();
         }
     }
-    public Action OnDawnMoveFreeze;
+
+    public event Action DawnMoveFreezed;
+    
     public void Init()
     {
         _magnit.Init(this);

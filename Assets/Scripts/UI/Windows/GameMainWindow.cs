@@ -17,14 +17,15 @@ public class GameMainWindow : AbstractWindow
     [SerializeField] private List<Joystick> _joysticks;
 
     private LevelConfig _levelConfig;
-    public static GameMainWindow Of(Crane crane, LevelConfig levelConfig) =>
+
+    public static GameMainWindow Show(Crane crane, LevelConfig levelConfig) =>
                     Game.Windows.ScreenChange<GameMainWindow>(false, w => w.Init(crane, levelConfig));
    
     private void Init(Crane crane, LevelConfig config)
     {
         ForceHide();
-        Game.LevelLoader.OnLoadingComplete += OnLevelLoaded;
-        Game.LevelLoader.OnExitLevel += OnExitLevel;
+        Game.LevelLoader.LoadingCompleted += OnLevelLoaded;
+        Game.LevelLoader.LevelExited += OnExitLevel;
 
         _carsInfoPanel.Init();
 
@@ -38,9 +39,19 @@ public class GameMainWindow : AbstractWindow
         _joysticks.ForEach(x => x.Init(crane));
     }
 
+    public void SetShipsInfo(int currentShipNumber, int shipsCount)
+    {
+        _infoScreenView.SetShipsInfo(currentShipNumber, shipsCount);
+    }
+
+    public void UpdateCrushContainersInfo()
+    {
+        _infoScreenView.OnContainerCrush();
+    }
+
     private void OnLevelLoaded()
     {
-        Game.LevelLoader.OnLoadingComplete -= OnLevelLoaded;
+        Game.LevelLoader.LoadingCompleted -= OnLevelLoaded;
         Unhide();
     }
     private void ShowHideOptions()
@@ -53,7 +64,7 @@ public class GameMainWindow : AbstractWindow
 
     private void OnExitButtonClick()
     {
-        ExitLevelWindow.Of();
+        ExitLevelWindow.Show();
     }
 
     private void OnInfoButtonClick()
@@ -61,17 +72,9 @@ public class GameMainWindow : AbstractWindow
         Debug.Log("info btn click");
     }
 
-    public void SetShipsInfo(int currentShipNumber, int shipsCount)
-    {
-        _infoScreenView.SetShipsInfo(currentShipNumber, shipsCount);
-    }
-    public void UpdateCrushContainersInfo()
-    {
-        _infoScreenView.OnContainerCrush();
-    }
     private void OnExitLevel()
     {
-        Game.LevelLoader.OnExitLevel -= OnExitLevel;
+        Game.LevelLoader.LevelExited -= OnExitLevel;
         Close();
     }
 }

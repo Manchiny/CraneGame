@@ -19,7 +19,7 @@ public class ShipSpawner : MonoBehaviour
 
         var ship = Instantiate(config.ShipPrefab, position, _spawnPoint.rotation).GetComponent<Ship>();
         ship.Init(config);
+
         return ship;
     }
-
 }

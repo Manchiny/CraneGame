@@ -52,6 +52,7 @@ public class LevelConfigs : ScriptableObject
             return stronglyCount;
         }
     }
+
     [Serializable]
     public class AvailableColor
     {

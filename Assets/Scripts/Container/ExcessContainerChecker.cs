@@ -4,10 +4,12 @@ public class ExcessContainerChecker : MonoBehaviour
 {
     private Container _container;
     private bool _isInited;
+
     private void Awake()
     {
         gameObject.SetActive(false);
     }
+
     public void Init(Container container)
     {
         gameObject.SetActive(true);
@@ -20,10 +22,9 @@ public class ExcessContainerChecker : MonoBehaviour
         if (!_isInited)
             return;
 
-        if (other.GetComponent<Container>() == true)
+        if (other.TryGetComponent(out Container container))
         {
-            var excessContainer = other.GetComponent<Container>();
-            _container.AddContainerAsWrong(excessContainer);
+            _container.AddContainerAsWrong(container);
         }
     }
 
@@ -32,11 +33,9 @@ public class ExcessContainerChecker : MonoBehaviour
         if (!_isInited)
             return;
 
-        if (other.GetComponent<Container>() == true)
+        if (other.TryGetComponent(out Container container))
         {
-            var excessContainer = other.GetComponent<Container>();
-            _container.RemoveContainerAsWrong(excessContainer);
+            _container.RemoveContainerAsWrong(container);
         }
-
     }
 }

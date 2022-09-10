@@ -12,12 +12,13 @@ public class MoveJoystick : Joystick
         _craneMoveDispose?.Clear();
         _craneMoveDispose = new CompositeDisposable();
     }
+
     public override void OnPointerDown(PointerEventData eventData)
     {
         Observable.EveryUpdate().Subscribe(_ =>
         {
-            _controller.MoveSide(Horizontal());
-            _controller.ArrowMove(Vertical());
+            Controller.MoveSide(Horizontal());
+            Controller.ArrowMove(Vertical());
         }).AddTo(_craneMoveDispose);
 
         base.OnPointerDown(eventData);
@@ -31,10 +32,10 @@ public class MoveJoystick : Joystick
             pos.x = (pos.x / _joystickBg.rectTransform.rect.size.x);
             pos.y = (pos.y / _joystickBg.rectTransform.rect.size.y);
         }
-        _inputVector = new Vector2(pos.x * 2, pos.y * 2);
-        _inputVector = (_inputVector.magnitude > 1.0f) ? _inputVector.normalized : _inputVector;
+        InputVector = new Vector2(pos.x * 2, pos.y * 2);
+        InputVector = (InputVector.magnitude > 1.0f) ? InputVector.normalized : InputVector;
 
-        _joystick.rectTransform.localPosition = new Vector2(_inputVector.x * (_joystickBg.rectTransform.rect.size.x / 2), _inputVector.y * (_joystickBg.rectTransform.rect.size.y / 2));
+        _joystick.rectTransform.localPosition = new Vector2(InputVector.x * (_joystickBg.rectTransform.rect.size.x / 2), InputVector.y * (_joystickBg.rectTransform.rect.size.y / 2));
     }
 
     public override void OnPointerUp(PointerEventData eventData)

@@ -5,24 +5,28 @@ using UnityEngine;
 [RequireComponent(typeof(CanvasGroup))]
 public abstract class AbstractWindow : MonoBehaviour
 {
-    private const float FADE_DURATION = 2f;
+    private const float FadeDuration = 2f;
+
     protected CanvasGroup _canvasGroup;
     protected RectTransform _content;
-    public Promise ClosePromise { get; } = new Promise();
 
     protected bool _isOpening = false;
-    public bool IsOpening => _isOpening;
-
     protected bool _isClosing = false;
+
+    protected Sequence _animationSequence;
+
+    public Promise ClosePromise { get; } = new Promise();
+    public bool IsOpening => _isOpening;
     public bool IsClosing => _isClosing;
 
-    protected Sequence _sequence;
+
     protected virtual void Awake()
     {
         _canvasGroup = GetComponent<CanvasGroup>();
         _content = transform.Find("Content").transform as RectTransform;
         OnAwake();
     }
+
     public virtual void Close()
     {
         if (_isClosing)
@@ -44,7 +48,7 @@ public abstract class AbstractWindow : MonoBehaviour
         _canvasGroup.interactable = true;
         _canvasGroup.blocksRaycasts = true;
 
-        _canvasGroup.DOFade(1, FADE_DURATION).SetLink(gameObject);
+        _canvasGroup.DOFade(1, FadeDuration).SetLink(gameObject);
     }
 
     protected void ForceHide()
@@ -60,16 +64,16 @@ public abstract class AbstractWindow : MonoBehaviour
 
         RectTransform _rectTransform = (RectTransform)_content.transform;
 
-        _sequence?.Complete();
+        _animationSequence?.Complete();
 
-        _sequence = DOTween.Sequence()
+        _animationSequence = DOTween.Sequence()
             .SetLink(gameObject)
             .Append(_rectTransform.DOMoveY(_rectTransform.position.y - 100f, 0.1f))
             .Append(_rectTransform.DOMoveY(_rectTransform.position.y + 800f, 0.3f));
 
-        _sequence.SetEase(Ease.Linear);
+        _animationSequence.SetEase(Ease.Linear);
 
-        _sequence.Play()
+        _animationSequence.Play()
             .OnComplete(() =>
             {
                 OnClose();
@@ -77,14 +81,10 @@ public abstract class AbstractWindow : MonoBehaviour
                 ClosePromise.Resolve();
             });
     }
+
     protected virtual void OnAwake() { }
     protected virtual void OnStart() { }
     protected virtual void OnClose() { }
 
 }
-public enum WindowState
-{
-    Open,
-    Process,
-    Close
-}
+

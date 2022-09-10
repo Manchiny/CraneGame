@@ -3,12 +3,9 @@ using UnityEngine;
 
 public class ParkingManager : MonoBehaviour
 {
-    public static ParkingManager Instance { get; private set; }
-
     [SerializeField] private ParkingPlace[] _parkingPlaces;
     [SerializeField] private Transform _exitPoint;
     [SerializeField] private CarSpawner _spawner;
-    public Transform GetExitPoint() => _exitPoint;
 
     private List<Car> _activeCars;
     private List<Car> _allCarsOnParking;
@@ -16,17 +13,8 @@ public class ParkingManager : MonoBehaviour
 
     private bool _isCrushProcessed;
     private Ship _ship;
-    private void Awake()
-    {
-        if (Instance == null)
-        {
-            Instance = this;
 
-            return;
-        }
-
-        Destroy(this);
-    }
+    public Transform GetExitPoint() => _exitPoint;
 
     public void Init()
     {
@@ -42,8 +30,30 @@ public class ParkingManager : MonoBehaviour
     public void SubscribeOnCrush(Ship ship)
     {
         _ship = ship;
-        _ship.OnCrush += OnContainerCrush;
+        _ship.ContainerCrushed += OnContainerCrush;
     }
+
+    public void OnNewCarCreated(Car car)
+    {
+        _activeCars.Add(car);
+        _allCarsOnParking.Add(car);
+        car.Exited += OnCarMoveExit;
+        car.LoadingCompleted += OnCarCompleteLoading;
+    }
+
+    public ParkingPlace GetFreeParkingPlaceOnEnd()
+    {
+        ParkingPlace place = null;
+        for (int i = _parkingPlaces.Length - 1; i >= 0; i--)
+        {
+            if (_parkingPlaces[i].IsFree)
+                place = _parkingPlaces[i];
+            else
+                return place;
+        }
+        return place;
+    }
+
     private void InitParkingPlaces()
     {
         for (int i = 0; i < _parkingPlaces.Length; i++)
@@ -52,6 +62,7 @@ public class ParkingManager : MonoBehaviour
             _parkingPlaces[i].SetCar(null);
         }
     }
+
     private void OnContainerCrush(Container container)
     {
       _crushedContainers.Enqueue(container);
@@ -59,6 +70,7 @@ public class ParkingManager : MonoBehaviour
         if (_isCrushProcessed == false)
             ProcessCrushConteiner();
     }
+
     private void ProcessCrushConteiner()
     {
         if (_crushedContainers.Count <= 0)
@@ -96,26 +108,20 @@ public class ParkingManager : MonoBehaviour
         
     }
 
-    public void OnNewCarCreated(Car car)
-    {
-        _activeCars.Add(car);
-        _allCarsOnParking.Add(car);
-        car.OnMoveExit += OnCarMoveExit;
-        car.OnCompleteLoading += OnCarCompleteLoading;
-    }
     private void OnCarMoveExit(Car car)
     {
         if (_allCarsOnParking.Count > 0)
         {
             _allCarsOnParking.Remove(car);
-            car.OnMoveExit -= OnCarMoveExit;
+            car.Exited -= OnCarMoveExit;
 
             _spawner.AddCarToQueue();
         }
     }
+
     private void OnCarCompleteLoading(Car car, bool isSuccess)
     {
-        car.OnCompleteLoading -= OnCarCompleteLoading;
+        car.LoadingCompleted -= OnCarCompleteLoading;
         _activeCars.Remove(car);
 
         if (car.CurrentPlace.Id == 0)
@@ -145,32 +151,20 @@ public class ParkingManager : MonoBehaviour
             }            
         }
     }
-    public ParkingPlace GetFreeParkingPlaceOnEnd()
-    {
-        ParkingPlace place = null;
-        for (int i = _parkingPlaces.Length - 1; i >= 0; i--)
-        {
-            if (_parkingPlaces[i].IsFree)
-                place = _parkingPlaces[i];
-            else
-                return place;
-        }
-        return place;
-    }
+
     private ParkingPlace GetFreeParkingPlaceOnHead()
     {
         ParkingPlace place = null;
+        
         for (int i = 0; i < _parkingPlaces.Length; i++)
         {
-            if (_parkingPlaces[i].IsFree)
+            if (_parkingPlaces[i].IsFree && place == null)
             {
-                if (place == null)
-                {
                     place = _parkingPlaces[i];
                     return place;
-                }
             }
         }
+
         return place;
     }
 }

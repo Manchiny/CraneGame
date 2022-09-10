@@ -3,12 +3,15 @@ using UnityEngine;
 public class CameraController : MonoBehaviour
 {
     [SerializeField] private Transform _magnit;
-    private float speed = 3;
+
+    private float _speed = 3;
+
     private void Start()
     {
         LookAtMagnit();
     }
-    void LateUpdate()
+
+    private void LateUpdate()
     {
         RotateToTarget(_magnit.position);
     }
@@ -22,6 +25,6 @@ public class CameraController : MonoBehaviour
     {
         Vector3 direction = point - transform.position;
         Quaternion rotation = Quaternion.LookRotation(direction);
-        transform.rotation = Quaternion.Lerp(transform.rotation, rotation, speed * Time.deltaTime);
+        transform.rotation = Quaternion.Lerp(transform.rotation, rotation, _speed * Time.deltaTime);
     }
 }

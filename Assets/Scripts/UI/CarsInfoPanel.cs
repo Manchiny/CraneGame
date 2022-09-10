@@ -12,18 +12,20 @@ public class CarsInfoPanel : MonoBehaviour
     public void Init()
     {
         if (_carSpawner != null)
-            _carSpawner.OnNewCarCreate -= OnNewCarCreated;
+            _carSpawner.NewCarCreated -= OnNewCarCreated;
 
         _carSpawner = FindObjectOfType<CarSpawner>();
-        _carSpawner.OnNewCarCreate += OnNewCarCreated;
+        _carSpawner.NewCarCreated += OnNewCarCreated;
     }
+
     private void OnNewCarCreated(Car car)
     {
         var indicator = Instantiate(_needColorViewPrefab, _content);
         indicator.Init(car);
     }
+
     private void OnDestroy()
     {
-        _carSpawner.OnNewCarCreate -= OnNewCarCreated;
+        _carSpawner.NewCarCreated -= OnNewCarCreated;
     }
 }

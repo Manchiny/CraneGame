@@ -1,5 +1,3 @@
-using RSG;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -20,7 +18,15 @@ public class ColorManager : MonoBehaviour
     public Dictionary<ContainerColor, Material> ContainerMaterials { get; private set; }
     public Dictionary<ContainerColor, Material> SignalMaterials { get; private set; }
 
-    public IPromise Init()
+    public enum ContainerColor
+    {
+        Black,
+        Blue,
+        Red,
+        Green
+    }
+
+    public void Init()
     {
         ContainerMaterials = new Dictionary<ContainerColor, Material>()
                 {
@@ -37,23 +43,12 @@ public class ColorManager : MonoBehaviour
                     {ContainerColor.Red, _redSignal },
                     {ContainerColor.Green, _greenSignal }
                 };
-
-        return Promise.Resolved();
-    }
-    public enum ContainerColor
-    {
-        Black,
-        Blue,
-        Red,
-        Green
     }
 
     public Material GetSignalMaterial(ContainerColor color)
     {
         if (SignalMaterials.TryGetValue(color, out Material value))
-        {
             return value;
-        }
         else return null;
     }
 

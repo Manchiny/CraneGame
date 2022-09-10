@@ -12,6 +12,7 @@ public class Locker : MonoBehaviour
     {
         gameObject.SetActive(false);
     }
+
     public void Lock(string key)
     {
         _lockedByKey.Add(key);
@@ -26,6 +27,26 @@ public class Locker : MonoBehaviour
         Debug.Log("Unlock: " + key);
     }
 
+    public void UnlockAll(string key)
+    {
+        _lockedByKey.RemoveAll(x => x == key);
+        UpdateActive();
+        Debug.Log("UnlockAll: " + key);
+    }
+
+    public void ClearAllLocks()
+    {
+        _lockedByKey.Clear();
+        UpdateActive();
+        Debug.Log("ClearAllLocks!" );
+    }
+
+    public bool IsLockedByKey(string key)
+    {
+        if (string.IsNullOrEmpty(key))
+            return false;
+        return _lockedByKey.Contains(key);
+    }
     private void UpdateActive()
     {
         var newValue = _lockedByKey.Count > 0;
@@ -34,24 +55,5 @@ public class Locker : MonoBehaviour
             gameObject.SetActive(newValue);
             IsLocked.Value = newValue;
         }
-    }
-
-    public void UnlockAll(string key)
-    {
-        _lockedByKey.RemoveAll(x => x == key);
-        UpdateActive();
-        Debug.Log("UnlockAll: " + key);
-    }
-    public void ClearAllLocks()
-    {
-        _lockedByKey.Clear();
-        UpdateActive();
-        Debug.Log("ClearAllLocks!" );
-    }
-    public bool IsLockedByKey(string key)
-    {
-        if (string.IsNullOrEmpty(key))
-            return false;
-        return _lockedByKey.Contains(key);
     }
 }

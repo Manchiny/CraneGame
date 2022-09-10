@@ -6,9 +6,15 @@ using static ColorManager;
 
 public class Car : MonoBehaviour
 {
-    [SerializeField] private float speed;
+    [SerializeField] private float _speed;
     [SerializeField] private MeshRenderer _colorSignal;
     [SerializeField] private ObstacleChecker _obstacleChecker;
+
+    //TODO: Acceleration speed
+    private float _destinationDistance = 0.1f;
+
+    private IDisposable _moveDispose;
+    private HashSet<Container> _wrongContainers = new HashSet<Container>();
 
     private ContainerColor _needColor;
     public ContainerColor NeedColor
@@ -18,101 +24,77 @@ public class Car : MonoBehaviour
         {
             _needColor = value;
             SetColorSignal(value);
-            OnColorSet?.Invoke(value);
+            ColorSeted?.Invoke(value);
         }
     }
-    private float _destinationDistance = 0.1f;
-    //TODO: Acceleration speed
+
     public ParkingPlace CurrentPlace { get; private set; }
-    private CompositeDisposable _disposeMove = new CompositeDisposable();
     public bool IsComplete { get; private set; }
     public bool IsWayFree { get; private set; } = true;
-    private HashSet<Container> _wrongContainers = new HashSet<Container>();
+
     public bool HasWrongsContainers => _wrongContainers.Count > 0;
 
-    public Action<Car> OnMoveExit;
-    public Action<Car, bool> OnCompleteLoading;
-    public Action<ContainerColor> OnColorSet;
-    public Action CheckNotify;
+    public event Action<Car> Exited;
+    public event Action<Car, bool> LoadingCompleted;
+    public event Action<ContainerColor> ColorSeted;
+    public event Action FreeWayChanged;
+
+    private void OnDestroy()
+    {
+        Game.LevelLoader.LevelExited -= OnLevelExit;
+
+        if(_moveDispose != null)
+            _moveDispose.Dispose();
+    }
+
     public void Init(ParkingPlace place, ContainerColor needColor)
     {
-        Game.LevelLoader.OnExitLevel += OnLevelExit;
+        Game.LevelLoader.LevelExited += OnLevelExit;
 
         _obstacleChecker.Init(this);
+
         NeedColor = needColor;
         MoveToParking(place);
     }
 
-    private void MoveTo(Transform point, Action onComplete = null)
-    {
-        Vector3 target = point.position;
-        target.y = 0;
-        var heading = target - transform.position;
-        if (heading.sqrMagnitude < _destinationDistance * _destinationDistance)
-        {
-            if (onComplete != null)
-                onComplete?.Invoke();
-
-            _disposeMove.Clear();
-            return;
-        }
-
-        if (IsWayFree && HasWrongsContainers == false)
-        {
-            transform.position += (target - transform.position).normalized * speed * Time.deltaTime;
-        }
-    }
-
     public void MoveToParking(ParkingPlace place)
     {
-        _disposeMove.Clear();
+        if (_moveDispose != null)
+            _moveDispose.Dispose();
+
         place.IsAwate = true;
 
         if (CurrentPlace != null)
-        {
             CurrentPlace.SetCar(null);
-        }
+
         CurrentPlace = place;
-        Observable.EveryUpdate().Subscribe(_ =>
-        {
-            MoveTo(place.transform, () => OnParking(place));
-        }).AddTo(_disposeMove);
-    }
-    private void OnParking(ParkingPlace place)
-    {
-        _disposeMove.Clear();
-        place.SetCar(this);
+
+        _moveDispose = Observable.EveryUpdate().Subscribe(_ =>
+                            {
+                                MoveTo(place.transform, () => OnParking(place));
+                            }).AddTo(gameObject);
     }
 
     public void CopmpleteLoading(bool isSuccess)
     {
         IsComplete = true;
         _colorSignal.gameObject.SetActive(false);
-        OnCompleteLoading?.Invoke(this, isSuccess);
+        LoadingCompleted?.Invoke(this, isSuccess);
     }
 
     public void MoveToExit()
     {
-        _disposeMove.Clear();
+        if (_moveDispose != null)
+            _moveDispose.Dispose();
+
         CurrentPlace.SetCar(null);
 
-        Transform exit = ParkingManager.Instance.GetExitPoint();
-        Observable.EveryUpdate().Subscribe(_ =>
-        {
-            MoveTo(exit, OnExit);
-        }).AddTo(_disposeMove);
-    }
-    private void OnExit()
-    {
-        _disposeMove.Clear();
+        Transform exit = Game.LevelManager.ParkingManager.GetExitPoint();
 
-        OnMoveExit?.Invoke(this);
-        Destroy(gameObject);
-    }
-    private void SetColorSignal(ContainerColor color)
-    {
-        Material material = Game.LevelManager.GetSignalMaterial(color);
-        _colorSignal.sharedMaterial = material;
+        _moveDispose = Observable.EveryUpdate().Subscribe(_ =>
+                            {
+                                MoveTo(exit, OnExit);
+                            }).AddTo(gameObject);
     }
 
     public void OnContainerCrush()
@@ -122,7 +104,7 @@ public class Car : MonoBehaviour
 
         if (isHasAvailibleColorContainer == false) // если ожидаемого цвета контейнеров больше нет - получаем новый
         {
-            if (levelManager.HasAvailibleColors() == true && levelManager.HasAvailibleContainers() == true)
+            if (levelManager.HasAvailibleColors() && levelManager.HasAvailibleContainers)
             {
                 NeedColor = levelManager.GetRandomAvailibleContainerColor();
             }
@@ -136,25 +118,68 @@ public class Car : MonoBehaviour
     public void SetFreeWay(bool value)
     {
         IsWayFree = value;
-        CheckNotify?.Invoke();
+        FreeWayChanged?.Invoke();
     }
 
     public void AddWrongContainer(Container container)
     {
         _wrongContainers.Add(container);
-        CheckNotify?.Invoke();
+        FreeWayChanged?.Invoke();
     }
 
     public void RemoveWrongContainer(Container container)
     {
         _wrongContainers.Remove(container);
-        CheckNotify?.Invoke();
+        FreeWayChanged?.Invoke();
     }
 
-    private void OnDestroy()
+    private void MoveTo(Transform point, Action onComplete = null)
     {
-        Game.LevelLoader.OnExitLevel -= OnLevelExit;
-        _disposeMove.Clear();
+        Vector3 target = point.position;
+        target.y = 0;
+        var heading = target - transform.position;
+
+        if (heading.sqrMagnitude < _destinationDistance * _destinationDistance)
+        {
+            if (onComplete != null)
+                onComplete?.Invoke();
+
+            if(_moveDispose != null)
+            {
+                _moveDispose.Dispose();
+                _moveDispose = null;
+            }
+
+            return;
+        }
+
+        if (IsWayFree && HasWrongsContainers == false)
+        {
+            transform.position += (target - transform.position).normalized * _speed * Time.deltaTime;
+        }
+    }
+
+    private void OnParking(ParkingPlace place)
+    {
+        if (_moveDispose != null)
+            _moveDispose.Dispose();
+
+        place.SetCar(this);
+    }
+
+    private void OnExit()
+    {
+        if (_moveDispose != null)
+            _moveDispose.Dispose();
+
+        Exited?.Invoke(this);
+        Destroy(gameObject);
+    }
+
+    private void SetColorSignal(ContainerColor color)
+    {
+        Material material = Game.LevelManager.GetSignalMaterial(color);
+        _colorSignal.sharedMaterial = material;
     }
 
     private void OnLevelExit()

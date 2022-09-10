@@ -8,22 +8,36 @@ public class NeedColorIndicatorView : MonoBehaviour
     [SerializeField] private Image _doneIndicator;
     [SerializeField] private CanvasGroup _canvasGroup;
     [SerializeField] private GameObject _notify;
-    public Car Car { get; private set; }
+    
     private Color _needColor;
+    public Car Car { get; private set; }
+
     private void Awake()
     {
         _canvasGroup.alpha = 0;
     }
+
+    private void OnDestroy()
+    {
+        if (Car != null)
+        {
+            Car.LoadingCompleted -= OnCompleteLoading;
+            Car.Exited -= OnCarMoveExit;
+            Car.ColorSeted -= SetNeedColor;
+            Car.FreeWayChanged -= ShowHideNotify;
+        }
+    }
+
     public void Init(Car car)
     {
         _notify.SetActive(false);
         _doneIndicator.gameObject.SetActive(false);
         Car = car;
 
-        Car.OnCompleteLoading += OnCompleteLoading;
-        Car.OnMoveExit += OnCarMoveExit;
-        Car.OnColorSet += SetNeedColor;
-        Car.CheckNotify += ShowHideNotify;
+        Car.LoadingCompleted += OnCompleteLoading;
+        Car.Exited += OnCarMoveExit;
+        Car.ColorSeted += SetNeedColor;
+        Car.FreeWayChanged += ShowHideNotify;
 
         SetNeedColor(Car.NeedColor);
         _canvasGroup.alpha = 1;
@@ -52,20 +66,9 @@ public class NeedColorIndicatorView : MonoBehaviour
             _indicatorImage.color = Color.gray;
     }
 
-    private void OnDestroy()
-    {
-        if (Car != null)
-        {
-            Car.OnCompleteLoading -= OnCompleteLoading;
-            Car.OnMoveExit -= OnCarMoveExit;
-            Car.OnColorSet -= SetNeedColor;
-            Car.CheckNotify -= ShowHideNotify;
-        }
-    }
-
     private void ShowHideNotify()
     {
-        bool isNeed = Car.IsWayFree == false || Car.HasWrongsContainers;
-        _notify.SetActive(isNeed);
+        bool needShow = Car.IsWayFree == false || Car.HasWrongsContainers;
+        _notify.SetActive(needShow);
     }
 }

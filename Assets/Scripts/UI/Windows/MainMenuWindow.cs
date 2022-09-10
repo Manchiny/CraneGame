@@ -4,12 +4,13 @@ using UnityEngine.UI;
 
 public class MainMenuWindow : AbstractWindow
 {
-    private const string LOCK_KEY = "MenuStartGame";
-
     [SerializeField] private Button _playButton;
     [SerializeField] private TextMeshProUGUI _levelText;
     [SerializeField] private Button _closeAppButton;
-    public static MainMenuWindow Of() =>
+
+    private const string LockKey = "MenuStartGame";
+
+    public static MainMenuWindow Show() =>
                     Game.Windows.ScreenChange<MainMenuWindow>(false, w => w.Init());
 
     protected void Init()
@@ -23,13 +24,13 @@ public class MainMenuWindow : AbstractWindow
 
     private void StartGame()
     {
-        Game.Locker.Lock(LOCK_KEY);
+        Game.Locker.Lock(LockKey);
         Game.LevelLoader.StartGame(OnLoadingComplete);
 
         void OnLoadingComplete()
         {
             Close();
-            Game.Locker.Unlock(LOCK_KEY);
+            Game.Locker.Unlock(LockKey);
         }
     }
 

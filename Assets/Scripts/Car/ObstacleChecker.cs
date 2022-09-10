@@ -5,6 +5,7 @@ public class ObstacleChecker : MonoBehaviour
 {
     private Car _car;
     private HashSet<Collider> _obstacles = new HashSet<Collider>();
+
     public void Init(Car car)
     {
         _car = car;

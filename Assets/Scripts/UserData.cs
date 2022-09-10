@@ -2,22 +2,23 @@ using UnityEngine;
 
 public class UserData
 {
-    private const string CURRENT_LEVEL = "CurrentLevel";
+    private const string CurrentLevelKey = "CurrentLevel";
+
     public int CurrentLevel => GetCurrentLevel();
 
     public void SetCurrentLevel()
     {
-        PlayerPrefs.SetInt(CURRENT_LEVEL, CurrentLevel + 1);
+        PlayerPrefs.SetInt(CurrentLevelKey, CurrentLevel + 1);
     }
 
     public void ResetLevel()
     {
-        PlayerPrefs.SetInt(CURRENT_LEVEL, 0);
-        ResetedProgressWindow.Of();
+        PlayerPrefs.SetInt(CurrentLevelKey, 0);
+        ResetedProgressWindow.Show();
     }
 
     private int GetCurrentLevel()
     {
-        return PlayerPrefs.GetInt(CURRENT_LEVEL);
+        return PlayerPrefs.GetInt(CurrentLevelKey);
     }
 }

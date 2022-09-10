@@ -2,31 +2,35 @@ using System;
 using System.Collections.Generic;
 using UniRx;
 using UnityEngine;
+using UnityStandardAssets.Water;
 using static ColorManager;
 
+[RequireComponent(typeof(BoxCollider))]
 public class Container : MonoBehaviour
 {
-    private const string CONTAINERS_CRUSH_OBJECTS_TAG = "ContainerTrap";
-
     [SerializeField] private List<ConteinerCarChecker> _carCheckers;
     [SerializeField] private MagnitChecker _magnitChecker;
     [SerializeField] private MeshRenderer _body;
     [SerializeField] private ExcessContainerChecker _excessContainerChecker;
-    public ContainerColor ContainerColor { get; private set; }
+    [Space]
+    [SerializeField] private float _containerHeight = 3f;
 
     private Ship _ship;
     private CarPlatform _carPlatform;
+
     private bool _onCar;
+    private bool _isMagnitize;
 
     private bool _isCrushed;
     private IDisposable _flipCheckDispose;
 
-
     private float _mass;
     private float _drag;
-    private RigidbodyInterpolation _interpolation;
     private bool _useGravity;
     private bool _isKinematic;
+    private RigidbodyInterpolation _interpolation;
+    public ContainerColor ContainerColor { get; private set; }
+    public float ContainerHeight => _containerHeight;
 
     public bool OnCar
     {
@@ -45,7 +49,6 @@ public class Container : MonoBehaviour
         }
     }
 
-    private bool _isMagnitize;
     public bool IsMagnitize
     {
         get => _isMagnitize;
@@ -57,13 +60,65 @@ public class Container : MonoBehaviour
         }
     }
 
+    private void OnDestroy()
+    {
+        Game.LevelLoader.LevelExited -= OnExitLevel;
+    }
+
     public void Init(Ship ship, ContainerColor color)
     {
-        Game.LevelLoader.OnExitLevel += OnExitLevel;
+        Game.LevelLoader.LevelExited += OnExitLevel;
         _ship = ship;
         SetConteinerColor(color);
         _excessContainerChecker.gameObject.SetActive(false);
         SaveRiggedbody();
+    }
+
+    public void AddRigidbody()
+    {
+        var rb = gameObject.AddComponent<Rigidbody>();
+        rb.mass = _mass;
+        rb.drag = _drag;
+        rb.interpolation = _interpolation;
+        rb.useGravity = _useGravity;
+        rb.isKinematic = _isKinematic;
+    }
+
+    public void SetMagnitizeStatus(bool isMagnitized)
+    {
+        IsMagnitize = isMagnitized;
+    }
+
+    public void SetConteinerColor(ContainerColor color)
+    {
+        Material material = null;
+
+        if (Game.ColorManager.ContainerMaterials.TryGetValue(color, out material))
+        {
+            _body.sharedMaterial = material;
+            ContainerColor = color;
+        }
+    }
+
+    public void Crush()
+    {
+        if (_isCrushed)
+            return;
+
+        _isCrushed = true;
+        _magnitChecker.gameObject.SetActive(false);
+        _ship?.OnContainerCrush(this);
+    }
+
+    public void AddContainerAsWrong(Container container)
+    {
+        _carPlatform.Car.AddWrongContainer(container);
+    }
+
+    public void RemoveContainerAsWrong(Container container)
+    {
+        if (_carPlatform != null)
+            _carPlatform.Car.RemoveWrongContainer(container);
     }
 
     private void SaveRiggedbody()
@@ -75,15 +130,7 @@ public class Container : MonoBehaviour
         _useGravity = rb.useGravity;
         _isKinematic = rb.isKinematic;
     }
-    public void AddRigidbody()
-    {
-        var rb = gameObject.AddComponent<Rigidbody>();
-        rb.mass = _mass;
-        rb.drag = _drag;
-        rb.interpolation = _interpolation;
-        rb.useGravity = _useGravity;
-        rb.isKinematic = _isKinematic;
-    }
+
     private void OnExitLevel()
     {
         _flipCheckDispose.Dispose();
@@ -106,10 +153,8 @@ public class Container : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.gameObject.tag == CONTAINERS_CRUSH_OBJECTS_TAG && IsMagnitize == false)
-        {
+        if ((other.gameObject.TryGetComponent(out MapBorder border) || other.gameObject.TryGetComponent(out Water water)) && IsMagnitize == false)
             Crush();
-        }
     }
 
     private void OnCollisionExit(Collision collision)
@@ -120,11 +165,6 @@ public class Container : MonoBehaviour
             OnCar = false;
             _carPlatform = null;
         }
-    }
-
-    public void SetMagnitizeStatus(bool isMagnitized)
-    {
-        IsMagnitize = isMagnitized;
     }
 
     private bool CheckForCorrectCollorAndPosition()
@@ -149,6 +189,7 @@ public class Container : MonoBehaviour
         Debug.Log("Succes!");
         RemoveContainerAsWrong(this);
         CompleteLoadig(true);
+
         return true;
     }
 
@@ -165,35 +206,6 @@ public class Container : MonoBehaviour
         _excessContainerChecker.Init(this);
     }
 
-    public void SetConteinerColor(ContainerColor color)
-    {
-        Material material = null;
-        if (Game.ColorManager.ContainerMaterials.TryGetValue(color, out material))
-        {
-            _body.sharedMaterial = material;
-            ContainerColor = color;
-        }
-    }
-    public void Crush()
-    {
-        if (_isCrushed)
-            return;
-
-        _isCrushed = true;
-        _magnitChecker.gameObject.SetActive(false);
-        _ship?.OnContainerCrush(this);
-    }
-
-    public void AddContainerAsWrong(Container container)
-    {
-        _carPlatform.Car.AddWrongContainer(container);
-    }
-
-    public void RemoveContainerAsWrong(Container container)
-    {
-        if (_carPlatform != null)
-            _carPlatform.Car.RemoveWrongContainer(container);
-    }
     private void StartCheckFlip()
     {
         var rb = GetComponent<Rigidbody>();
@@ -202,6 +214,7 @@ public class Container : MonoBehaviour
 
         _flipCheckDispose = CheckForFlip(rb);
     }
+
     private IDisposable CheckForFlip(Rigidbody rb)
     {
         return Observable.EveryUpdate().Subscribe(_ =>
@@ -223,11 +236,6 @@ public class Container : MonoBehaviour
                 }
             }
         }).AddTo(this);
-    }
-
-    private void OnDestroy()
-    {
-        Game.LevelLoader.OnExitLevel -= OnExitLevel;
     }
 }
 

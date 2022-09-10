@@ -7,38 +7,83 @@ using static LevelConfigs;
 
 public class Ship : MonoBehaviour
 {
-    private const float CONTAINER_HEIGHT = 3f;
-
     [SerializeField] private List<Transform> _containerPlacement;
     [SerializeField] private Transform _containerHolder;
-    [SerializeField] private GameObject _containerPrefab;
+    [SerializeField] private Container _containerPrefab;
     [SerializeField] private MeshFilter _shipBody;
     [SerializeField] private float _parkingMoveTime;
     [Space]
     [SerializeField] private AnimationCurve _moveSpeedCurve;
-    public List<Container> Containers { get; private set; }
-    public MeshFilter ShipBody => _shipBody;
-    public Dictionary<ContainerColor, int> AvailibleCollors { get; private set; }
-    public Action<Container> OnCrush;
-    public Action OnContainersEnded;
 
     private ShipConfig _config;
     private int _raws = 2;
+
+    private float _containersHeight;
+    private List<Container> _containers;
+
+    public MeshFilter ShipBody => _shipBody;
+    public int ContainersCount => _containers == null ? 0 : _containers.Count;
+
+    public Dictionary<ContainerColor, int> AvailibleCollors { get; private set; }
+
+    public event Action<Container> ContainerCrushed;
+    public event Action ContainersEnded;
+
+    private void OnDestroy()
+    {
+        Game.LevelLoader.LevelExited -= OnExitLevel;
+    }
+
     public void Init(ShipConfig config)
     {
-        Containers = new List<Container>();
-        Game.LevelLoader.OnExitLevel += OnExitLevel;
+        _containers = new List<Container>();
+        Game.LevelLoader.LevelExited += OnExitLevel;
+
+        _containersHeight = _containerPrefab.ContainerHeight;
+
         _config = config;
         _raws = _config.Raws;
         var configColors = GetConfigAvailibleColor(config.AvailibleColors);
+
         AvailibleCollors = new Dictionary<ContainerColor, int>();
-        foreach (var item in configColors)
-        {
-            AvailibleCollors.Add(item.Key, 0);
-        }
+
+        foreach (var color in configColors)
+            AvailibleCollors.Add(color.Key, 0);
 
         InitContainers(configColors, config.StronglyCount());
     }
+
+    public void RemoveContainer(Container container)
+    {
+        _containers.Remove(container);
+        if (_containers.Count == 0)
+            ContainersEnded?.Invoke();
+    }
+
+    public void RemoveAvailibleColorsCount(ContainerColor color)
+    {
+        if (AvailibleCollors.TryGetValue(color, out int value))
+        {
+            value--;
+            AvailibleCollors[color] = value;
+        }
+    }
+
+    public void OnContainerCrush(Container container)
+    {
+        RemoveAvailibleColorsCount(container.ContainerColor);
+        ContainerCrushed?.Invoke(container);
+    }
+
+    public void MoveTo(Transform targetPoint)
+    {
+        var position = targetPoint.position;
+
+        transform.DOMoveZ(targetPoint.position.z, _parkingMoveTime, false)
+            .SetEase(Ease.InOutQuad)
+            .SetLink(gameObject);
+    }
+
     private void InitContainers(Dictionary<ContainerColor, int> availableColors, int stronglyCount)
     {
         var newAvailableColors = availableColors;
@@ -53,7 +98,7 @@ public class Ship : MonoBehaviour
             {
                 foreach (var place in _containerPlacement)
                 {
-                    if (Containers.Count < stronglyCount)
+                    if (_containers.Count < stronglyCount)
                     {
                         CreateContainer(place, i);
                     }
@@ -72,19 +117,18 @@ public class Ship : MonoBehaviour
         }
 
         foreach (var place in _containerPlacement)
-        {
             place.gameObject.SetActive(false);
-        }
 
         void CreateContainer(Transform place, int i)
         {
             Vector3 position = place.position;
-            position.y = place.position.y + (CONTAINER_HEIGHT + offset) * (1 + i);
-            var container = Instantiate(_containerPrefab, position, place.rotation, _containerHolder).GetComponent<Container>();
+
+            position.y = place.position.y + (_containersHeight + offset) * (1 + i);
+            var container = Instantiate(_containerPrefab, position, place.rotation, _containerHolder);
 
             var color = GetColorRandom();
             container.Init(this, color);
-            Containers.Add(container);
+            _containers.Add(container);
             AddAvailibleColorsCount(color);
         }
 
@@ -92,8 +136,10 @@ public class Ship : MonoBehaviour
         {
             List<ContainerColor> keyList = new List<ContainerColor>(newAvailableColors.Keys);
             int count = keyList.Count;
+
             ContainerColor randomColor = keyList[UnityEngine.Random.Range(0, count)];
             newAvailableColors[randomColor] -= 1;
+
             if (newAvailableColors[randomColor] <= 0)
                 newAvailableColors.Remove(randomColor);
 
@@ -106,20 +152,11 @@ public class Ship : MonoBehaviour
         var result = new Dictionary<ContainerColor, int>();
 
         foreach (var item in configColors)
-        {
             result.Add(item.ContainerColor, item.MaxCount == 0 ? 200 : item.MaxCount);
-        }
 
         return result;
     }
-
-    public void RemoveContainer(Container container)
-    {
-        Containers.Remove(container);
-        if (Containers.Count == 0)
-            OnContainersEnded?.Invoke();
-    }
-
+  
     private void AddAvailibleColorsCount(ContainerColor color)
     {
         if (AvailibleCollors.TryGetValue(color, out int value))
@@ -129,33 +166,6 @@ public class Ship : MonoBehaviour
         }
     }
 
-    public void RemoveAvailibleColorsCount(ContainerColor color)
-    {
-        if (AvailibleCollors.TryGetValue(color, out int value))
-        {
-            value--;
-            AvailibleCollors[color] = value;
-        }
-    }
-
-    public void OnContainerCrush(Container container)
-    {
-        RemoveAvailibleColorsCount(container.ContainerColor);
-        OnCrush?.Invoke(container);
-    }
-
-    public void MoveTo(Transform targetPoint)
-    {
-        var position = targetPoint.position;
-        transform.DOMoveZ(targetPoint.position.z, _parkingMoveTime, false)
-            .SetEase(Ease.InOutQuad)
-            .SetLink(gameObject);
-    }
-
-    private void OnDestroy()
-    {
-        Game.LevelLoader.OnExitLevel -= OnExitLevel;
-    }
     private void OnExitLevel()
     {
         Destroy(gameObject);

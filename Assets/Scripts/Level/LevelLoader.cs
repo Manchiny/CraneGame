@@ -10,11 +10,11 @@ public class LevelLoader : MonoBehaviour
     private LevelConfig[] _levels => _levelConfigs.Configs;
     private LevelConfig _levelConfig;
 
-    // private CompositeDisposable _dispose = new CompositeDisposable();
     private LoadingWindow _loader;
 
-    public Action OnLoadingComplete;
-    public Action OnExitLevel;
+    public event Action LoadingCompleted;
+    public event Action LevelExited;
+
     public IPromise StartGame(Action onComplete)
     {
         Promise promise = new Promise();
@@ -22,19 +22,20 @@ public class LevelLoader : MonoBehaviour
 
         if (_levelConfig != null)
         {         
-            _loader = LoadingWindow.Of();
+            _loader = LoadingWindow.Show();
 
             Crane crane = FindObjectOfType<Crane>();
             crane.Init();
 
-            var window = GameMainWindow.Of(crane, _levelConfig);
+            var window = GameMainWindow.Show(crane, _levelConfig);
 
-            Game.LevelManager.StartLevel(_levelConfig, this, window)
-            .Then(() => AwaitingPromise(1f))
+            Game.LevelManager.StartLevel(_levelConfig, this, window);
+
+            AwaitingPromise(1f)
             .Then(() => _loader?.Close())
             .Then(() =>
             {
-                OnLoadingComplete?.Invoke();
+                LoadingCompleted?.Invoke();
                 onComplete?.Invoke();
             })
             .Then(() => promise.Resolve());
@@ -42,16 +43,33 @@ public class LevelLoader : MonoBehaviour
         else
         {
             Game.Locker.ClearAllLocks();
-            NoMoreLevelsWindow.Of();
+            NoMoreLevelsWindow.Show();
+
             return Promise.Resolved();
         }
 
         return promise;
     }
 
+    public void ExitLevel(Action onComplete)
+    {
+        _loader = LoadingWindow.Show();
+        LevelExited?.Invoke();
+
+        AwaitingPromise(1f)
+        .Then(() => _loader?.Close())
+        .Then(() => MainMenuWindow.Show())
+        .Then(() =>
+        {
+            LoadingCompleted?.Invoke();
+            onComplete?.Invoke();
+        });
+    }
+
     private LevelConfig GetLevel()
     {
         int levelId = Game.User.CurrentLevel;
+
         if (levelId < _levels.Length)
             return _levels[levelId];
         else
@@ -68,21 +86,7 @@ public class LevelLoader : MonoBehaviour
             yield return new WaitForSeconds(seconds);
             promise.Resolve();
         }
+
         return promise;
-    }
-
-    public void ExitLevel(Action onComplete)
-    {
-        _loader = LoadingWindow.Of();
-        OnExitLevel?.Invoke();
-
-        AwaitingPromise(1f)
-        .Then(() => _loader?.Close())
-        .Then(() => MainMenuWindow.Of())
-        .Then(() =>
-        {
-            OnLoadingComplete?.Invoke();
-            onComplete?.Invoke();
-        });
     }
 }

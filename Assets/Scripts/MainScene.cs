@@ -4,7 +4,7 @@ using UnityEngine.SceneManagement;
 
 public class MainScene : MonoBehaviour
 {
-    private const int GAME_SCENE_ID = 1;
+    private const int GameSceneId = 1;
 
     [SerializeField] private LoaderWindow _window;
 
@@ -13,19 +13,23 @@ public class MainScene : MonoBehaviour
         _window.Init();
         StartCoroutine(LoadGameScene());
     }
+
     private IEnumerator LoadGameScene()
     {
-        AsyncOperation operation = SceneManager.LoadSceneAsync(GAME_SCENE_ID);
+        AsyncOperation operation = SceneManager.LoadSceneAsync(GameSceneId);
         operation.allowSceneActivation = false;
+
         while(!operation.isDone)
         {
             float progress = operation.progress/0.9f;
             _window.SetProgress(progress);
+        
             if(_window.GetProgessBarValue() >= 0.999f)
             {
                 yield return new WaitForSeconds(0.5f);
                 operation.allowSceneActivation = true;
             }
+
             yield return null;
         }
     }
