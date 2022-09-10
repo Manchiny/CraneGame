@@ -3,7 +3,27 @@ guid: 2afafeca46d8b1d49b68c4f115eaa296
 ModelImporter:
   serializedVersion: 20200
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: 01 - Default
+    second: {fileID: 2100000, guid: 3edd62788657be241911748ed0ae2386, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: 04 - Default
+    second: {fileID: 2100000, guid: f3ff6a23ff18b0f4f90a62238dcde935, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Poruchni
+    second: {fileID: 2100000, guid: d73d3de12c6eba54eb23fcdbc1e18f7e, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Windows
+    second: {fileID: 2100000, guid: 00b5244335098ce4dac3c7f8e93bdaa6, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0
