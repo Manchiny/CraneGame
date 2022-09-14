@@ -1,0 +1,48 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 6
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Cartioon_Water
+  m_Shader: {fileID: -6465566751694194690, guid: 50b1d01b40ddfc5428c45122dc7d9eca, type: 3}
+  m_ShaderKeywords: 
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 1
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - unity_Lightmaps:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - unity_LightmapsInd:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - unity_ShadowMasks:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Floats:
+    - Vector1_0922843b43be47398c2daf5450967c57: 319.2
+    - Vector1_215fd1425c2e4beb8cf9b6e10ec1b071: 2.05
+    - Vector1_379fa30747ec496fa5184256500ae28e: 0.1
+    - Vector1_3b569e3860eb484e8fa24c598ba451c3: 0.12
+    - Vector1_495e2396f5974217b689ddee13eaebac: 0.1
+    - Vector1_71a56dfbf221481dbe4ea501e505c772: 900
+    - Vector1_7bf6b813fb514c0fae39f5d697344903: 1.8
+    - Vector1_8021a7ae0cb640879d7b5f9b7cc06b23: 30
+    - Vector1_a153ef5b6d9749c49b1f79b2d5ab0fb7: 0.83
+    m_Colors:
+    - Color_55c701e72233416e97e31f0bba30cbdc: {r: 2.8016853, g: 3.7936752, b: 5.7665753, a: 0}
+    - Color_6d28f6fa44064bda90ed5f03c1a3a28f: {r: 0.1273585, g: 0.47256535, b: 1, a: 0}
+    - Color_8adc332bb27d419c871ed9efd54b752f: {r: 1, g: 1, b: 1, a: 1}
+  m_BuildTextureStacks: []
