@@ -15,9 +15,15 @@ MonoBehaviour:
   _levelConfigs:
   - _maxContainersCrushes: 2
     _shipConfig:
-    - _raws: 1
+    - _raws: 3
       _availibleColors:
       - _color: 1
+        _maxCount: 0
+      - _color: 0
+        _maxCount: 0
+      - _color: 2
+        _maxCount: 0
+      - _color: 3
         _maxCount: 0
       _shipPrefab: {fileID: 6767250939860062568, guid: f078c9296ba0ff541b82458896c0325a, type: 3}
     - _raws: 1

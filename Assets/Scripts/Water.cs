@@ -1,18 +1,13 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class Water : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
+    [SerializeField] private ParticleSystem _splashesFX;
 
-    // Update is called once per frame
-    void Update()
+    private Quaternion _fxRotation = Quaternion.Euler(-90f, 0, 0);
+
+    public void PlaySplashesEffect(Vector3 position)
     {
-        
+        var effect = Instantiate(_splashesFX, position, _fxRotation);
     }
 }

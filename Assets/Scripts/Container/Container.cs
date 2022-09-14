@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using UniRx;
 using UnityEngine;
-using UnityStandardAssets.Water;
 using static ColorManager;
 
 [RequireComponent(typeof(BoxCollider))]
@@ -57,6 +56,49 @@ public class Container : MonoBehaviour
             _isMagnitize = value;
             if (value == true)
                 OnCar = false;
+        }
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.GetComponent<CarPlatform>() == true)
+        {
+            _carPlatform = collision.gameObject.GetComponent<CarPlatform>();
+            OnCar = true;
+        }
+
+        if (IsMagnitize == false)
+        {
+            StartCheckFlip();
+        }
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (IsMagnitize == false)
+        {
+            if (other.gameObject.TryGetComponent(out MapBorder border))
+            {
+                Crush();
+            }
+            else if (other.gameObject.TryGetComponent(out Water water))
+            {
+                var position = transform.position;
+                position.y = water.transform.position.y;
+                water.PlaySplashesEffect(transform.position);
+
+                Crush();
+            }
+        }
+
+    }
+
+    private void OnCollisionExit(Collision collision)
+    {
+        if (collision.gameObject.GetComponent<CarPlatform>() == true)
+        {
+            OnCar = false;
+            _carPlatform = null;
         }
     }
 
@@ -135,36 +177,6 @@ public class Container : MonoBehaviour
     {
         _flipCheckDispose.Dispose();
         Destroy(gameObject);
-    }
-
-    private void OnCollisionEnter(Collision collision)
-    {
-        if (collision.gameObject.GetComponent<CarPlatform>() == true)
-        {
-            _carPlatform = collision.gameObject.GetComponent<CarPlatform>();
-            OnCar = true;
-        }
-
-        if (IsMagnitize == false)
-        {
-            StartCheckFlip();
-        }
-    }
-
-    private void OnTriggerEnter(Collider other)
-    {
-        if ((other.gameObject.TryGetComponent(out MapBorder border) || other.gameObject.TryGetComponent(out Water water)) && IsMagnitize == false)
-            Crush();
-    }
-
-    private void OnCollisionExit(Collision collision)
-    {
-
-        if (collision.gameObject.GetComponent<CarPlatform>() == true)
-        {
-            OnCar = false;
-            _carPlatform = null;
-        }
     }
 
     private bool CheckForCorrectCollorAndPosition()

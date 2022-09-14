@@ -482,7 +482,7 @@ MeshRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 716646391}
   m_Enabled: 1
-  m_CastShadows: 1
+  m_CastShadows: 0
   m_ReceiveShadows: 1
   m_DynamicOccludee: 0
   m_MotionVectors: 1
@@ -796,6 +796,22 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6128147249981778519, guid: e8c50af5327c6094f9add700acfcc956, type: 3}
+      propertyPath: _redSignal
+      value: 
+      objectReference: {fileID: 2100000, guid: 8d4ff68c3cddc1d4da52a94d0b81cbb4, type: 2}
+    - target: {fileID: 6128147249981778519, guid: e8c50af5327c6094f9add700acfcc956, type: 3}
+      propertyPath: _blueSignal
+      value: 
+      objectReference: {fileID: 2100000, guid: 0776c540a93aeea4aa033f09aa2b8d4b, type: 2}
+    - target: {fileID: 6128147249981778519, guid: e8c50af5327c6094f9add700acfcc956, type: 3}
+      propertyPath: _blackSignal
+      value: 
+      objectReference: {fileID: 2100000, guid: 261d65510a4c3a64d8dd541b7948f0b3, type: 2}
+    - target: {fileID: 6128147249981778519, guid: e8c50af5327c6094f9add700acfcc956, type: 3}
+      propertyPath: _greenSignal
+      value: 
+      objectReference: {fileID: 2100000, guid: bfe4d7681a54f844e88780a0baa731ba, type: 2}
     - target: {fileID: 6128147249981778542, guid: e8c50af5327c6094f9add700acfcc956, type: 3}
       propertyPath: m_Name
       value: Canvas_Main
@@ -916,7 +932,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1136025278}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 900, y: -0.9952345, z: 0}
+  m_LocalPosition: {x: 900, y: -1, z: 0}
   m_LocalScale: {x: 200, y: 1, z: 200}
   m_Children: []
   m_Father: {fileID: 2059355229}
@@ -934,6 +950,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 976f437bee9e0494083dba66f14e66c5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _splashesFX: {fileID: 0}
 --- !u!65 &1136025281
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -1054,7 +1071,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1305233456}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 492, y: -0.9952345, z: 0}
+  m_LocalPosition: {x: 492, y: -1, z: 0}
   m_LocalScale: {x: 400, y: 1, z: 400}
   m_Children: []
   m_Father: {fileID: 2059355229}
@@ -1072,6 +1089,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 976f437bee9e0494083dba66f14e66c5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _splashesFX: {fileID: 1868627188800721688, guid: 540c568ff651b0d449de12d1e58c1a64, type: 3}
 --- !u!65 &1305233459
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -1314,7 +1332,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1598165688}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 492, y: -0.9952345, z: 0}
+  m_LocalPosition: {x: 492, y: -1, z: 0}
   m_LocalScale: {x: 400, y: 1, z: 400}
   m_Children: []
   m_Father: {fileID: 2059355229}
@@ -1394,6 +1412,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 976f437bee9e0494083dba66f14e66c5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _splashesFX: {fileID: 0}
 --- !u!1 &1761532193
 GameObject:
   m_ObjectHideFlags: 0
