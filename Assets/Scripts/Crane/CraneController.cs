@@ -129,7 +129,7 @@ public class CraneController : MonoBehaviour
             _arrow3.Translate(_arrowMoveDirection * _arrowSpeed * factor * Time.deltaTime);
         else if (_arrow2.localPosition.z > MinArrowDistance)
             _arrow2.Translate(_arrowMoveDirection * _arrowSpeed * factor * Time.deltaTime);
-        else if (_arrow1.localPosition.z > -MinFirstArrowDistance)
+        else if (_arrow1.localPosition.z > MinFirstArrowDistance)
             _arrow1.Translate(_arrowMoveDirection * _arrowSpeed * factor * Time.deltaTime);
     }
 

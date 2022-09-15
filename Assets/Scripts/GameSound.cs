@@ -15,7 +15,7 @@ public class GameSound : MonoBehaviour
     private const float SeaNoiseVolume = 0.45f;
 
     private const float CarNoiseVolume = 0.15f;
-    private const float CarSignalVolume = 0.9f;
+    private const float CarSignalVolume = 0.15f;
 
     private AudioSource _water;
 
@@ -33,6 +33,14 @@ public class GameSound : MonoBehaviour
         _levelLoader = levelLoader;
         _levelLoader.LoadingCompleted += OnLevelLoaded;
         _levelLoader.LevelExited += OnLevelExited;
+
+        SetSound(Game.User.IsSoundOn());
+    }
+
+    public void SetSound(bool needActivate)
+    {
+        Game.User.SetSoundActive(needActivate);
+        AudioListener.volume = needActivate ? 1 : 0;
     }
 
     public void SetWater(AudioSource source)
@@ -69,9 +77,7 @@ public class GameSound : MonoBehaviour
 
     private void PlaySound(AudioSource source, AudioClip clip, float volume)
     {
-      //  source.Stop();
         source.volume = volume;
-
         source.clip = clip;
         source.Play();
     }

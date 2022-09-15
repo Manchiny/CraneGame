@@ -7,6 +7,8 @@ public class Game : MonoBehaviour
 	[SerializeField] private LevelManager _levelManager;
 	[SerializeField] private ColorManager _colors;
 	[SerializeField] private GameSound _gameSound;
+	//[Space]
+	//[SerializeField] private Audi
 
 	private UserData _userData;
 
@@ -48,9 +50,9 @@ public class Game : MonoBehaviour
 	private void Init()
 	{
 		Utils.SetMainContainer(this);
-		Sound.Init(LevelLoader);
-
 		_userData = new UserData();
+
+		Sound.Init(LevelLoader);
 		_colors.Init();
 		MainMenuWindow.Show();
 	}
