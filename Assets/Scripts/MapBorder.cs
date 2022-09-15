@@ -1,5 +1,5 @@
 using UnityEngine;
 
-public class MapBorder : MonoBehaviour
+public class MapBorder : MonoBehaviour, INoiseless
 {
 }

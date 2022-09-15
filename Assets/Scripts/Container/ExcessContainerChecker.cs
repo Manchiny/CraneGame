@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class ExcessContainerChecker : MonoBehaviour
+public class ExcessContainerChecker : Checker
 {
     private Container _container;
     private bool _isInited;

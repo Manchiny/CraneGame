@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ObstacleChecker : MonoBehaviour
+public class ObstacleChecker : Checker
 {
     private Car _car;
     private HashSet<Collider> _obstacles = new HashSet<Collider>();

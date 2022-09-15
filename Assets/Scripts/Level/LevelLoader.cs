@@ -61,7 +61,7 @@ public class LevelLoader : MonoBehaviour
         .Then(() => MainMenuWindow.Show())
         .Then(() =>
         {
-            LoadingCompleted?.Invoke();
+           // LoadingCompleted?.Invoke();
             onComplete?.Invoke();
         });
     }

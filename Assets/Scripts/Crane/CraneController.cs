@@ -22,7 +22,11 @@ public class CraneController : MonoBehaviour
 
 
     private const float MaxArrowDistance = 13f;
+    private const float MinArrowDistance = 0.01f;
+    private const float MinFirstArrowDistance = -3f;
+
     private Vector3 _arrowMoveDirection = new Vector3(0, 0, 1);
+   
 
     private Crane _crane;
     private Magnit _magnit;
@@ -121,11 +125,11 @@ public class CraneController : MonoBehaviour
 
     private void ArrowShorten(float factor = -1)
     {
-        if (_arrow3.localPosition.z > 0.01f)
+        if (_arrow3.localPosition.z > MinArrowDistance)
             _arrow3.Translate(_arrowMoveDirection * _arrowSpeed * factor * Time.deltaTime);
-        else if (_arrow2.localPosition.z > 0.01f)
+        else if (_arrow2.localPosition.z > MinArrowDistance)
             _arrow2.Translate(_arrowMoveDirection * _arrowSpeed * factor * Time.deltaTime);
-        else if (_arrow1.localPosition.z > -1f)
+        else if (_arrow1.localPosition.z > -MinFirstArrowDistance)
             _arrow1.Translate(_arrowMoveDirection * _arrowSpeed * factor * Time.deltaTime);
     }
 

@@ -1,9 +1,8 @@
 using UnityEngine;
 
-public class ConteinerCarChecker : MonoBehaviour
+public class ConteinerCarChecker : Checker
 {
     public bool IsOnCar { get; private set; }
-
 
     private void OnTriggerEnter(Collider other)
     {

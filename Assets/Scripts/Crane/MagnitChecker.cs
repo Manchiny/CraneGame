@@ -1,6 +1,5 @@
-using UnityEngine;
 
-public class MagnitChecker : MonoBehaviour
+public class MagnitChecker : Checker
 {
     public Container Container { get; private set; }
 

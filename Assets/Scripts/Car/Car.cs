@@ -4,13 +4,17 @@ using UniRx;
 using UnityEngine;
 using static ColorManager;
 
+[RequireComponent(typeof(AudioSource))]
 public class Car : MonoBehaviour
 {
     [SerializeField] private float _speed;
     [SerializeField] private MeshRenderer _colorSignal;
     [SerializeField] private ObstacleChecker _obstacleChecker;
+    [SerializeField] private ParticleSystem _containerPlaceFX;
+    [Space]
+    [SerializeField] private AudioSource _carNoiseSource;
+    [SerializeField] private AudioSource _carSignalSource;
 
-    //TODO: Acceleration speed
     private float _destinationDistance = 0.1f;
 
     private IDisposable _moveDispose;
@@ -50,6 +54,7 @@ public class Car : MonoBehaviour
     public void Init(ParkingPlace place, ContainerColor needColor)
     {
         Game.LevelLoader.LevelExited += OnLevelExit;
+        Game.Sound.PlayCarNoiseSound(_carNoiseSource);
 
         _obstacleChecker.Init(this);
 
@@ -165,6 +170,7 @@ public class Car : MonoBehaviour
             _moveDispose.Dispose();
 
         place.SetCar(this);
+        Game.Sound.PlayCarSignalSound(_carSignalSource);
     }
 
     private void OnExit()
@@ -180,6 +186,7 @@ public class Car : MonoBehaviour
     {
         Material material = Game.LevelManager.GetSignalMaterial(color);
         _colorSignal.sharedMaterial = material;
+        _containerPlaceFX.startColor = material.color;
     }
 
     private void OnLevelExit()

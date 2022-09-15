@@ -13,6 +13,10 @@ public class Container : MonoBehaviour
     [SerializeField] private ExcessContainerChecker _excessContainerChecker;
     [Space]
     [SerializeField] private float _containerHeight = 3f;
+    [SerializeField] private AudioSource _audioSource;
+
+    private const float WaterSoundDuration = 0.4f;
+    private bool _isWaterSoundPlaying;
 
     private Ship _ship;
     private CarPlatform _carPlatform;
@@ -21,7 +25,7 @@ public class Container : MonoBehaviour
     private bool _isMagnitize;
 
     private bool _isCrushed;
-    private IDisposable _flipCheckDispose;
+    private IDisposable _checkFlipDispose;
 
     private float _mass;
     private float _drag;
@@ -53,7 +57,11 @@ public class Container : MonoBehaviour
         get => _isMagnitize;
         private set
         {
+            if (value != _isMagnitize && value == true)
+                Game.Sound.PlayHitSound(_audioSource);
+
             _isMagnitize = value;
+
             if (value == true)
                 OnCar = false;
         }
@@ -61,6 +69,14 @@ public class Container : MonoBehaviour
 
     private void OnCollisionEnter(Collision collision)
     {
+        if (_isWaterSoundPlaying == false 
+            && ((collision.gameObject.TryGetComponent(out Magnit magnit) == true && magnit.IsFreezed == false) 
+            || (magnit == null && collision.gameObject.GetComponent<INoiseless>() == null)))
+        {
+            Game.Sound.PlayHitSound(_audioSource);
+            Debug.Log("Sound colission with:" + collision.gameObject.name);
+        }
+
         if (collision.gameObject.GetComponent<CarPlatform>() == true)
         {
             _carPlatform = collision.gameObject.GetComponent<CarPlatform>();
@@ -78,19 +94,10 @@ public class Container : MonoBehaviour
         if (IsMagnitize == false)
         {
             if (other.gameObject.TryGetComponent(out MapBorder border))
-            {
                 Crush();
-            }
             else if (other.gameObject.TryGetComponent(out Water water))
-            {
-                var position = transform.position;
-                position.y = water.transform.position.y;
-                water.PlaySplashesEffect(transform.position);
-
-                Crush();
-            }
+                OnWaterEnter(water);
         }
-
     }
 
     private void OnCollisionExit(Collision collision)
@@ -175,8 +182,24 @@ public class Container : MonoBehaviour
 
     private void OnExitLevel()
     {
-        _flipCheckDispose.Dispose();
+        _checkFlipDispose.Dispose();
         Destroy(gameObject);
+    }
+
+    private void OnWaterEnter(Water water)
+    {
+        var position = transform.position;
+        position.y = water.transform.position.y;
+
+        water.PlaySplashesEffect(transform.position);
+        Game.Sound.PlaySplashSound(_audioSource);
+
+        _isWaterSoundPlaying = true;
+
+        Utils.WaitSeconds(WaterSoundDuration)
+            .Then(() => _isWaterSoundPlaying = false);
+
+        Crush();
     }
 
     private bool CheckForCorrectCollorAndPosition()
@@ -224,7 +247,7 @@ public class Container : MonoBehaviour
         if (rb == null)
             return;
 
-        _flipCheckDispose = CheckForFlip(rb);
+        _checkFlipDispose = CheckForFlip(rb);
     }
 
     private IDisposable CheckForFlip(Rigidbody rb)
@@ -233,12 +256,12 @@ public class Container : MonoBehaviour
         {
             if (rb == null)
             {
-                _flipCheckDispose.Dispose();
+                _checkFlipDispose.Dispose();
                 return;
             }
             if (_isCrushed == false && rb.velocity == Vector3.zero)
             {
-                _flipCheckDispose.Dispose();
+                _checkFlipDispose.Dispose();
 
                 var rotation = transform.rotation;
                 if (Mathf.Abs(180 - Mathf.Abs(rotation.x)) < 15)
