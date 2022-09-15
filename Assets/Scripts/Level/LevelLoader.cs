@@ -27,7 +27,7 @@ public class LevelLoader : MonoBehaviour
             Crane crane = FindObjectOfType<Crane>();
             crane.Init();
 
-            var window = GameMainWindow.Show(crane, _levelConfig);
+            var window = GameHUDWindow.Show(crane, _levelConfig);
 
             Game.LevelManager.StartLevel(_levelConfig, this, window);
 

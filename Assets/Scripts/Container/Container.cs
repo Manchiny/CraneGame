@@ -74,7 +74,6 @@ public class Container : MonoBehaviour
             || (magnit == null && collision.gameObject.GetComponent<INoiseless>() == null)))
         {
             Game.Sound.PlayHitSound(_audioSource);
-            Debug.Log("Sound colission with:" + collision.gameObject.name);
         }
 
         if (collision.gameObject.GetComponent<CarPlatform>() == true)

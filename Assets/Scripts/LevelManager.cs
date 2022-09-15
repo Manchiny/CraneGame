@@ -12,7 +12,7 @@ public class LevelManager : MonoBehaviour
 
     private int _nextShipId;
     private LevelLoader _levelLoader;
-    private GameMainWindow _window;
+    private GameHUDWindow _window;
     
     private int _canCrushContainers;
     private bool _isEnded;
@@ -31,7 +31,7 @@ public class LevelManager : MonoBehaviour
 
     public ParkingManager ParkingManager => _parkingManager;
 
-    public void StartLevel(LevelConfig config, LevelLoader loader, GameMainWindow window)
+    public void StartLevel(LevelConfig config, LevelLoader loader, GameHUDWindow window)
     {
         _isEnded = false;
 

@@ -7,7 +7,7 @@ public class WindowsHolder
     {
         [typeof(MainMenuWindow)] = "Windows/MainMenuWindow",
         [typeof(LoadingWindow)] = "Windows/LoadingWindow",
-        [typeof(GameMainWindow)] = "Windows/GameMainWindow",
+        [typeof(GameHUDWindow)] = "Windows/GameHUDWindow",
         [typeof(ExitLevelWindow)] = "Windows/ExitLevelWindow",
         [typeof(LevelCompleteWindow)] = "Windows/LevelCompleteWindow",
         [typeof(LevelFailedWindow)] = "Windows/LevelFailedWindow",

@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using static LevelConfigs;
 
-public class GameMainWindow : AbstractWindow
+public class GameHUDWindow : AbstractWindow
 {
     [SerializeField] private CarsInfoPanel _carsInfoPanel;
     [SerializeField] private InfoScreenView _infoScreenView;
@@ -18,8 +18,8 @@ public class GameMainWindow : AbstractWindow
 
     private LevelConfig _levelConfig;
 
-    public static GameMainWindow Show(Crane crane, LevelConfig levelConfig) =>
-                    Game.Windows.ScreenChange<GameMainWindow>(false, w => w.Init(crane, levelConfig));
+    public static GameHUDWindow Show(Crane crane, LevelConfig levelConfig) =>
+                    Game.Windows.ScreenChange<GameHUDWindow>(false, w => w.Init(crane, levelConfig));
    
     private void Init(Crane crane, LevelConfig config)
     {
