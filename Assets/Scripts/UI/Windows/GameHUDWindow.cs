@@ -69,7 +69,8 @@ public class GameHUDWindow : AbstractWindow
 
     private void OnInfoButtonClick()
     {
-        Debug.Log("info btn click");
+        Hide();
+        GameInfoWindow.Show(Unhide);
     }
 
     private void OnExitLevel()

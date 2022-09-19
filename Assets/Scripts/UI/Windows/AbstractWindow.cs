@@ -51,12 +51,21 @@ public abstract class AbstractWindow : MonoBehaviour
         _canvasGroup.DOFade(1, FadeDuration).SetLink(gameObject);
     }
 
+    protected void Hide()
+    {
+        _canvasGroup.interactable = false;
+        _canvasGroup.blocksRaycasts = false;
+
+        _canvasGroup.DOFade(0, FadeDuration).SetLink(gameObject);
+    }
+
     protected void ForceHide()
     {
         _canvasGroup.interactable = false;
         _canvasGroup.blocksRaycasts = false;
         _canvasGroup.alpha = 0;
     }
+
     protected void CloseAnimated()
     {
         if (_isClosing)

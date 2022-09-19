@@ -13,7 +13,8 @@ public class WindowsHolder
         [typeof(LevelFailedWindow)] = "Windows/LevelFailedWindow",
         [typeof(NoMoreLevelsWindow)] = "Windows/NoMoreLevelsWindow",
         [typeof(ConfirmWindow)] = "Windows/ConfirmWindow",
-        [typeof(ResetedProgressWindow)] = "Windows/ResetedProgressWindow"
+        [typeof(ResetedProgressWindow)] = "Windows/ResetedProgressWindow",
+        [typeof(GameInfoWindow)] = "Windows/GameInfoWindow"
     };
 }
 
