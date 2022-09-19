@@ -708,6 +708,22 @@ PrefabInstance:
       propertyPath: _gameSound
       value: 
       objectReference: {fileID: 1003724821}
+    - target: {fileID: 6128147249981778519, guid: e8c50af5327c6094f9add700acfcc956, type: 3}
+      propertyPath: _yellow
+      value: 
+      objectReference: {fileID: 2100000, guid: 5135d66a3b05ccd4b874e38a532bdad1, type: 2}
+    - target: {fileID: 6128147249981778519, guid: e8c50af5327c6094f9add700acfcc956, type: 3}
+      propertyPath: _magenta
+      value: 
+      objectReference: {fileID: 2100000, guid: ea7307dd5e72ff543ab530c3f894f836, type: 2}
+    - target: {fileID: 6128147249981778519, guid: e8c50af5327c6094f9add700acfcc956, type: 3}
+      propertyPath: _yellowSignal
+      value: 
+      objectReference: {fileID: 2100000, guid: 3a8944f1b850da148af52aad40c8c9d6, type: 2}
+    - target: {fileID: 6128147249981778519, guid: e8c50af5327c6094f9add700acfcc956, type: 3}
+      propertyPath: _magentaSignal
+      value: 
+      objectReference: {fileID: 2100000, guid: e2e18b55d4665cf48815a89be729d279, type: 2}
     - target: {fileID: 6128147249981778542, guid: e8c50af5327c6094f9add700acfcc956, type: 3}
       propertyPath: m_Name
       value: Canvas_Main

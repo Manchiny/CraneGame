@@ -8,12 +8,16 @@ public class ColorManager : MonoBehaviour
     [SerializeField] private Material _blue;
     [SerializeField] private Material _red;
     [SerializeField] private Material _green;
+    [SerializeField] private Material _yellow;
+    [SerializeField] private Material _magenta;
     [Space]
     [Header("Материалы для сигнала машин")]
     [SerializeField] private Material _blackSignal;
     [SerializeField] private Material _blueSignal;
     [SerializeField] private Material _redSignal;
     [SerializeField] private Material _greenSignal;
+    [SerializeField] private Material _yellowSignal;
+    [SerializeField] private Material _magentaSignal;
 
     public Dictionary<ContainerColor, Material> ContainerMaterials { get; private set; }
     public Dictionary<ContainerColor, Material> SignalMaterials { get; private set; }
@@ -23,7 +27,9 @@ public class ColorManager : MonoBehaviour
         Black,
         Blue,
         Red,
-        Green
+        Green,
+        Yellow,
+        Magenta
     }
 
     public void Init()
@@ -33,7 +39,9 @@ public class ColorManager : MonoBehaviour
                     {ContainerColor.Black, _black },
                     {ContainerColor.Blue, _blue },
                     {ContainerColor.Red, _red },
-                    {ContainerColor.Green, _green }
+                    {ContainerColor.Green, _green },
+                    {ContainerColor.Yellow, _yellow },
+                    {ContainerColor.Magenta, _magenta }
                 };
 
         SignalMaterials = new Dictionary<ContainerColor, Material>()
@@ -41,7 +49,9 @@ public class ColorManager : MonoBehaviour
                     {ContainerColor.Black, _blackSignal },
                     {ContainerColor.Blue, _blueSignal },
                     {ContainerColor.Red, _redSignal },
-                    {ContainerColor.Green, _greenSignal }
+                    {ContainerColor.Green, _greenSignal },
+                    {ContainerColor.Yellow, _yellowSignal },
+                    {ContainerColor.Magenta, _magentaSignal }
                 };
     }
 

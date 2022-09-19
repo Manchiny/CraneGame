@@ -15,15 +15,9 @@ MonoBehaviour:
   _levelConfigs:
   - _maxContainersCrushes: 2
     _shipConfig:
-    - _raws: 3
+    - _raws: 1
       _availibleColors:
       - _color: 1
-        _maxCount: 0
-      - _color: 0
-        _maxCount: 0
-      - _color: 2
-        _maxCount: 0
-      - _color: 3
         _maxCount: 0
       _shipPrefab: {fileID: 6767250939860062568, guid: f078c9296ba0ff541b82458896c0325a, type: 3}
     - _raws: 1
@@ -48,7 +42,7 @@ MonoBehaviour:
       _availibleColors:
       - _color: 2
         _maxCount: 0
-      - _color: 0
+      - _color: 4
         _maxCount: 0
       _shipPrefab: {fileID: 6767250939860062568, guid: b54304a27a90e9d4082b398848f019c4, type: 3}
   - _maxContainersCrushes: 3
@@ -66,7 +60,7 @@ MonoBehaviour:
       _availibleColors:
       - _color: 2
         _maxCount: 0
-      - _color: 0
+      - _color: 4
         _maxCount: 0
       - _color: 3
         _maxCount: 0
@@ -99,7 +93,7 @@ MonoBehaviour:
       _availibleColors:
       - _color: 2
         _maxCount: 0
-      - _color: 0
+      - _color: 4
         _maxCount: 0
       - _color: 3
         _maxCount: 0
@@ -116,7 +110,7 @@ MonoBehaviour:
         _maxCount: 0
       - _color: 2
         _maxCount: 0
-      - _color: 0
+      - _color: 4
         _maxCount: 0
       _shipPrefab: {fileID: 6767250939860062568, guid: f078c9296ba0ff541b82458896c0325a, type: 3}
   - _maxContainersCrushes: 3
@@ -129,7 +123,7 @@ MonoBehaviour:
         _maxCount: 0
       - _color: 2
         _maxCount: 0
-      - _color: 0
+      - _color: 4
         _maxCount: 0
       _shipPrefab: {fileID: 6767250939860062568, guid: eab80ebff6a4f8a469bfc4005e382e9c, type: 3}
   - _maxContainersCrushes: 3
@@ -142,14 +136,14 @@ MonoBehaviour:
         _maxCount: 0
       - _color: 2
         _maxCount: 0
-      - _color: 0
+      - _color: 4
         _maxCount: 0
       _shipPrefab: {fileID: 6767250939860062568, guid: f078c9296ba0ff541b82458896c0325a, type: 3}
     - _raws: 1
       _availibleColors:
       - _color: 2
         _maxCount: 0
-      - _color: 0
+      - _color: 4
         _maxCount: 0
       - _color: 3
         _maxCount: 0
@@ -160,7 +154,7 @@ MonoBehaviour:
       _availibleColors:
       - _color: 2
         _maxCount: 0
-      - _color: 0
+      - _color: 5
         _maxCount: 0
       - _color: 3
         _maxCount: 0
@@ -188,7 +182,7 @@ MonoBehaviour:
         _maxCount: 0
       - _color: 2
         _maxCount: 0
-      - _color: 0
+      - _color: 4
         _maxCount: 0
       _shipPrefab: {fileID: 6767250939860062568, guid: e5e23dc4b53185a4c97a18bc7e32c477, type: 3}
     - _raws: 1
@@ -212,7 +206,7 @@ MonoBehaviour:
         _maxCount: 0
       - _color: 2
         _maxCount: 0
-      - _color: 0
+      - _color: 4
         _maxCount: 0
       _shipPrefab: {fileID: 6767250939860062568, guid: 726a2e49cd34a544ebd8e33e35a01ced, type: 3}
   - _maxContainersCrushes: 5
@@ -225,14 +219,14 @@ MonoBehaviour:
         _maxCount: 0
       - _color: 2
         _maxCount: 0
-      - _color: 0
+      - _color: 4
         _maxCount: 0
       _shipPrefab: {fileID: 6767250939860062568, guid: b54304a27a90e9d4082b398848f019c4, type: 3}
     - _raws: 1
       _availibleColors:
       - _color: 2
         _maxCount: 0
-      - _color: 0
+      - _color: 4
         _maxCount: 0
       - _color: 3
         _maxCount: 0
@@ -243,7 +237,7 @@ MonoBehaviour:
       _availibleColors:
       - _color: 2
         _maxCount: 0
-      - _color: 0
+      - _color: 4
         _maxCount: 0
       - _color: 3
         _maxCount: 0
@@ -260,7 +254,7 @@ MonoBehaviour:
         _maxCount: 0
       - _color: 2
         _maxCount: 0
-      - _color: 0
+      - _color: 4
         _maxCount: 0
       _shipPrefab: {fileID: 6767250939860062568, guid: 6d94db08f7b602b41b6f1c9a1b292a87, type: 3}
   - _maxContainersCrushes: 5
@@ -273,14 +267,14 @@ MonoBehaviour:
         _maxCount: 0
       - _color: 2
         _maxCount: 0
-      - _color: 0
+      - _color: 4
         _maxCount: 0
       _shipPrefab: {fileID: 6767250939860062568, guid: f078c9296ba0ff541b82458896c0325a, type: 3}
     - _raws: 1
       _availibleColors:
       - _color: 2
         _maxCount: 0
-      - _color: 0
+      - _color: 4
         _maxCount: 0
       - _color: 3
         _maxCount: 0
@@ -291,7 +285,7 @@ MonoBehaviour:
       _availibleColors:
       - _color: 2
         _maxCount: 0
-      - _color: 0
+      - _color: 4
         _maxCount: 0
       - _color: 3
         _maxCount: 0
@@ -302,7 +296,7 @@ MonoBehaviour:
       _availibleColors:
       - _color: 2
         _maxCount: 0
-      - _color: 0
+      - _color: 4
         _maxCount: 0
       - _color: 3
         _maxCount: 0
