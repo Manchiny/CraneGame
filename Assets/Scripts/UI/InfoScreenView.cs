@@ -7,12 +7,15 @@ public class InfoScreenView : MonoBehaviour
     [SerializeField] private TextMeshProUGUI _shipsText;
     [SerializeField] private TextMeshProUGUI _crushedContainersText;
 
+    private const float MaxRotationAngle = 180f;
+    private const float TargetAngle = 90f;
+
     private Magnit _magnit;
     private int _canCrushContainers;
 
     public void Init(Magnit magnit, int shipsCount, int canCrushContainers)
     {
-        if(_magnit != null)
+        if (_magnit != null)
             _magnit.RotationChanged -= OnCargoAngelSet;
 
         _magnit = magnit;
@@ -36,8 +39,7 @@ public class InfoScreenView : MonoBehaviour
                 _cargoAngelText.text = "Rotation: 00";
             else
             {
-                // _cargoAngelText.text = $"Rotation: {Mathf.Abs(angel).ToString()}";
-                float rotation = angel > 180 ? Mathf.Abs(angel - 180 -90) : Mathf.Abs(angel-90);
+                float rotation = angel > MaxRotationAngle ? Mathf.Abs(angel - MaxRotationAngle - TargetAngle) : Mathf.Abs(angel - TargetAngle);
                 _cargoAngelText.text = $"Rotation: {rotation.ToString().Substring(0, Mathf.Abs(rotation).ToString().LastIndexOf(',') + 2)}";
             }
         }

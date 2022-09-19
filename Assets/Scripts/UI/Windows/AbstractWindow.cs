@@ -5,7 +5,12 @@ using UnityEngine;
 [RequireComponent(typeof(CanvasGroup))]
 public abstract class AbstractWindow : MonoBehaviour
 {
-    private const float FadeDuration = 2f;
+    private const float UnfideDuration = 2f;
+    private const float HideDuration = 1f;
+
+    private const float CloseAnimationMoveDownDuration = 0.1f;
+    private const float CloseAnimationMoveUpDuration = 0.3f;
+    private const float CloseAnimationMoveDownDistance = 100f;
 
     protected CanvasGroup _canvasGroup;
     protected RectTransform _content;
@@ -48,7 +53,7 @@ public abstract class AbstractWindow : MonoBehaviour
         _canvasGroup.interactable = true;
         _canvasGroup.blocksRaycasts = true;
 
-        _canvasGroup.DOFade(1, FadeDuration).SetLink(gameObject);
+        _canvasGroup.DOFade(1, UnfideDuration).SetLink(gameObject);
     }
 
     protected void Hide()
@@ -56,7 +61,7 @@ public abstract class AbstractWindow : MonoBehaviour
         _canvasGroup.interactable = false;
         _canvasGroup.blocksRaycasts = false;
 
-        _canvasGroup.DOFade(0, FadeDuration).SetLink(gameObject);
+        _canvasGroup.DOFade(0, HideDuration).SetLink(gameObject);
     }
 
     protected void ForceHide()
@@ -71,14 +76,14 @@ public abstract class AbstractWindow : MonoBehaviour
         if (_isClosing)
             return;
 
-        RectTransform _rectTransform = (RectTransform)_content.transform;
+        RectTransform _rectTransform = _content;
 
         _animationSequence?.Complete();
 
         _animationSequence = DOTween.Sequence()
             .SetLink(gameObject)
-            .Append(_rectTransform.DOMoveY(_rectTransform.position.y - 100f, 0.1f))
-            .Append(_rectTransform.DOMoveY(_rectTransform.position.y + 800f, 0.3f));
+            .Append(_rectTransform.DOMoveY(_rectTransform.position.y - CloseAnimationMoveDownDistance, CloseAnimationMoveDownDuration))
+            .Append(_rectTransform.DOMoveY(Screen.safeArea.height * 2f, CloseAnimationMoveUpDuration));
 
         _animationSequence.SetEase(Ease.Linear);
 

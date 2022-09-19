@@ -24,14 +24,14 @@ public class GameSound : MonoBehaviour
 
     private void OnDestroy()
     {
-        _levelLoader.LoadingCompleted -= OnLevelLoaded;
+        _levelLoader.LevelLoaded -= OnLevelLoaded;
         _levelLoader.LevelExited -= OnLevelExited;
     }
 
     public void Init(LevelLoader levelLoader)
     {
         _levelLoader = levelLoader;
-        _levelLoader.LoadingCompleted += OnLevelLoaded;
+        _levelLoader.LevelLoaded += OnLevelLoaded;
         _levelLoader.LevelExited += OnLevelExited;
 
         SetSound(Game.User.IsSoundOn());

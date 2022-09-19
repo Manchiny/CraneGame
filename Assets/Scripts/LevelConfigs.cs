@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using static ColorManager;
 
@@ -30,7 +31,7 @@ public class LevelConfigs : ScriptableObject
         [SerializeField] private AvailableColor[] _availibleColors;
         [SerializeField] private Ship _shipPrefab;
         public int Raws => _raws;
-        public AvailableColor[] AvailibleColors => _availibleColors;
+        public IReadOnlyList<AvailableColor> AvailibleColors => _availibleColors;
         public Ship ShipPrefab => _shipPrefab;
 
         /// <summary>

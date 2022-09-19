@@ -7,29 +7,34 @@ public class CarSpawner : MonoBehaviour
 {
     [SerializeField] private Car _carPrefab;
     [SerializeField] private Transform _spawnPoint;
- 
+
     private const float Cooldawn = 2f;
+    private const int MaxCars = 3;
 
     private ParkingManager _parkingManager;
 
     private int _needCars = 3;
     private float _timer;
-    
-    private CompositeDisposable _timerDispose;
+
+    private IDisposable _timerDispose;
     private Car _car = null;
 
     public event Action<Car> NewCarCreated;
 
+    private void OnDestroy()
+    {
+        RemoveSubscribes();
+    }
+
     public void Init(Action<Car> onCreateCar)
     {
-        _timerDispose = new CompositeDisposable();
         Game.LevelLoader.LevelExited += OnLevelExit;
         _parkingManager = Game.LevelManager.ParkingManager;
         _car = null;
 
         NewCarCreated += onCreateCar;
 
-        _needCars = 3;
+        _needCars = MaxCars;
         CreateCar();
     }
 
@@ -49,14 +54,14 @@ public class CarSpawner : MonoBehaviour
 
     private void CreateCar()
     {
-        if (Game.LevelManager.HasAvailibleContainers == false || Game.LevelManager.HasAvailibleColors() == false)
+        if (Game.LevelManager.HasAvailibleContainers == false || Game.LevelManager.HasAnyAvailibleColor == false)
             return;
 
         var place = _parkingManager.GetFreeParkingPlaceOnEnd();
 
         if (place != null && _needCars > 0)
         {
-            ContainerColor color = Game.LevelManager.GetRandomAvailibleContainerColor();
+            ContainerColor color = Game.LevelManager.GetRandomAvailibleContainerColor;
 
             var position = _spawnPoint.position;
             position.y = 0;
@@ -65,22 +70,22 @@ public class CarSpawner : MonoBehaviour
             _needCars--;
             _car.Init(place, color);
             NewCarCreated?.Invoke(_car);
+
             StartTimer();
         }
     }
 
-
     private void StartTimer()
     {
-        if (_timerDispose.Count > 0)
+        if (_timerDispose != null)
             return;
 
         _timer = Cooldawn;
 
-        Observable.EveryUpdate().Subscribe(_ =>
-        {
-            Timer();
-        }).AddTo(_timerDispose);
+        _timerDispose = Observable.EveryUpdate().Subscribe(_ =>
+            {
+                Timer();
+            }).AddTo(gameObject);
     }
 
     private void Timer()
@@ -89,17 +94,30 @@ public class CarSpawner : MonoBehaviour
             _timer -= Time.deltaTime;
         else
         {
-            _timerDispose.Clear();
+            if (_timerDispose != null)
+            {
+                _timerDispose.Dispose();
+                _timerDispose = null;
+            }
 
-            if(_needCars > 0)
+            if (_needCars > 0)
                 CreateCar();
         }
     }
 
     private void OnLevelExit()
     {
-        _timerDispose.Clear();
+        RemoveSubscribes();
         _needCars = 0;
+    }
+
+    private void RemoveSubscribes()
+    {
+        if (_timerDispose != null)
+        {
+            _timerDispose.Dispose();
+            _timerDispose = null;
+        }
 
         Game.LevelLoader.LevelExited -= OnLevelExit;
     }

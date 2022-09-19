@@ -15,6 +15,9 @@ public class Container : MonoBehaviour
     [SerializeField] private float _containerHeight = 3f;
     [SerializeField] private AudioSource _audioSource;
 
+    private const float MuteSoundAfterInitSeconds = 2f;
+    private const float MaxAngleXToFlip = 15f;
+
     private const float WaterSoundDuration = 0.4f;
     private bool _isWaterSoundPlaying;
 
@@ -22,18 +25,23 @@ public class Container : MonoBehaviour
     private CarPlatform _carPlatform;
 
     private bool _onCar;
-    private bool _isMagnitize;
+    private bool _isMagnited;
 
     private bool _isCrushed;
     private IDisposable _checkFlipDispose;
 
+    private Rigidbody _rigidbody;
     private float _mass;
     private float _drag;
     private bool _useGravity;
     private bool _isKinematic;
     private RigidbodyInterpolation _interpolation;
+
+    private bool _isSoundInited;
+
     public ContainerColor ContainerColor { get; private set; }
     public float ContainerHeight => _containerHeight;
+    public Rigidbody Rigidbody => _rigidbody;
 
     public bool OnCar
     {
@@ -52,15 +60,15 @@ public class Container : MonoBehaviour
         }
     }
 
-    public bool IsMagnitize
+    public bool IsMagnited
     {
-        get => _isMagnitize;
+        get => _isMagnited;
         private set
         {
-            if (value != _isMagnitize && value == true)
+            if (value != _isMagnited && value == true)
                 Game.Sound.PlayHitSound(_audioSource);
 
-            _isMagnitize = value;
+            _isMagnited = value;
 
             if (value == true)
                 OnCar = false;
@@ -69,7 +77,7 @@ public class Container : MonoBehaviour
 
     private void OnCollisionEnter(Collision collision)
     {
-        if (_isWaterSoundPlaying == false 
+        if (_isSoundInited && _isWaterSoundPlaying == false 
             && ((collision.gameObject.TryGetComponent(out Magnit magnit) == true && magnit.IsFreezed == false) 
             || (magnit == null && collision.gameObject.GetComponent<INoiseless>() == null)))
         {
@@ -82,7 +90,7 @@ public class Container : MonoBehaviour
             OnCar = true;
         }
 
-        if (IsMagnitize == false)
+        if (IsMagnited == false)
         {
             StartCheckFlip();
         }
@@ -90,7 +98,7 @@ public class Container : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (IsMagnitize == false)
+        if (IsMagnited == false)
         {
             if (other.gameObject.TryGetComponent(out MapBorder border))
                 Crush();
@@ -110,31 +118,24 @@ public class Container : MonoBehaviour
 
     private void OnDestroy()
     {
+        if (_checkFlipDispose != null)
+            _checkFlipDispose.Dispose();
+
         Game.LevelLoader.LevelExited -= OnExitLevel;
     }
 
     public void Init(Ship ship, ContainerColor color)
     {
         Game.LevelLoader.LevelExited += OnExitLevel;
+        _rigidbody = GetComponent<Rigidbody>();
+
         _ship = ship;
         SetConteinerColor(color);
         _excessContainerChecker.gameObject.SetActive(false);
         SaveRiggedbody();
-    }
 
-    public void AddRigidbody()
-    {
-        var rb = gameObject.AddComponent<Rigidbody>();
-        rb.mass = _mass;
-        rb.drag = _drag;
-        rb.interpolation = _interpolation;
-        rb.useGravity = _useGravity;
-        rb.isKinematic = _isKinematic;
-    }
-
-    public void SetMagnitizeStatus(bool isMagnitized)
-    {
-        IsMagnitize = isMagnitized;
+        Utils.WaitSeconds(MuteSoundAfterInitSeconds)
+            .Then(() => _isSoundInited = true);
     }
 
     public void SetConteinerColor(ContainerColor color)
@@ -169,14 +170,38 @@ public class Container : MonoBehaviour
             _carPlatform.Car.RemoveWrongContainer(container);
     }
 
+    public void SetFree()
+    {
+        transform.parent = null;
+        AddRigidbody();
+        IsMagnited = false;
+    }
+
+    public void OnMagniteze()
+    {
+        if (Rigidbody != null)
+            Destroy(Rigidbody);
+
+        IsMagnited = true;
+    }
+
+    private void AddRigidbody()
+    {
+        _rigidbody = gameObject.AddComponent<Rigidbody>();
+        _rigidbody.mass = _mass;
+        _rigidbody.drag = _drag;
+        _rigidbody.interpolation = _interpolation;
+        _rigidbody.useGravity = _useGravity;
+        _rigidbody.isKinematic = _isKinematic;
+    }
+
     private void SaveRiggedbody()
     {
-        var rb = GetComponent<Rigidbody>();
-        _mass = rb.mass;
-        _drag = rb.drag;
-        _interpolation = rb.interpolation;
-        _useGravity = rb.useGravity;
-        _isKinematic = rb.isKinematic;
+        _mass = _rigidbody.mass;
+        _drag = _rigidbody.drag;
+        _interpolation = _rigidbody.interpolation;
+        _useGravity = _rigidbody.useGravity;
+        _isKinematic = _rigidbody.isKinematic;
     }
 
     private void OnExitLevel()
@@ -229,7 +254,7 @@ public class Container : MonoBehaviour
 
     private void CompleteLoadig(bool isSucces)
     {
-        Destroy(GetComponent<Rigidbody>());
+        Destroy(_rigidbody);
         _magnitChecker.gameObject.SetActive(false);
         _ship.RemoveContainer(this);
 
@@ -242,11 +267,10 @@ public class Container : MonoBehaviour
 
     private void StartCheckFlip()
     {
-        var rb = GetComponent<Rigidbody>();
-        if (rb == null)
+        if (_rigidbody == null)
             return;
 
-        _checkFlipDispose = CheckForFlip(rb);
+        _checkFlipDispose = CheckForFlip(_rigidbody);
     }
 
     private IDisposable CheckForFlip(Rigidbody rb)
@@ -254,16 +278,15 @@ public class Container : MonoBehaviour
         return Observable.EveryUpdate().Subscribe(_ =>
         {
             if (rb == null)
-            {
-                _checkFlipDispose.Dispose();
                 return;
-            }
+
             if (_isCrushed == false && rb.velocity == Vector3.zero)
             {
                 _checkFlipDispose.Dispose();
 
                 var rotation = transform.rotation;
-                if (Mathf.Abs(180 - Mathf.Abs(rotation.x)) < 15)
+
+                if ((Mathf.Abs(180 - Mathf.Abs(rotation.eulerAngles.x)) < MaxAngleXToFlip) || (Mathf.Abs(180 - Mathf.Abs(rotation.eulerAngles.z)) < MaxAngleXToFlip))
                 {
                     Crush();
                     Debug.Log("CONTAINER FLIPED!!!");

@@ -16,20 +16,17 @@ public class GameHUDWindow : AbstractWindow
     [Header("Джойстики:")]
     [SerializeField] private List<Joystick> _joysticks;
 
-    private LevelConfig _levelConfig;
-
     public static GameHUDWindow Show(Crane crane, LevelConfig levelConfig) =>
                     Game.Windows.ScreenChange<GameHUDWindow>(false, w => w.Init(crane, levelConfig));
    
     private void Init(Crane crane, LevelConfig config)
     {
         ForceHide();
-        Game.LevelLoader.LoadingCompleted += OnLevelLoaded;
+        Game.LevelLoader.LevelLoaded += OnLevelLoaded;
         Game.LevelLoader.LevelExited += OnExitLevel;
 
         _carsInfoPanel.Init();
 
-        _levelConfig = config;
         _infoScreenView.Init(crane.Magnit, config.ShipConfigs.Length, config.MaxContainerCrushes);
 
         _optionsButton.onClick.AddListener(ShowHideOptions);
@@ -51,7 +48,7 @@ public class GameHUDWindow : AbstractWindow
 
     private void OnLevelLoaded()
     {
-        Game.LevelLoader.LoadingCompleted -= OnLevelLoaded;
+        Game.LevelLoader.LevelLoaded -= OnLevelLoaded;
         Unhide();
     }
     private void ShowHideOptions()

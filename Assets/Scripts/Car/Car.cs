@@ -34,9 +34,10 @@ public class Car : MonoBehaviour
 
     public ParkingPlace CurrentPlace { get; private set; }
     public bool IsComplete { get; private set; }
-    public bool IsWayFree { get; private set; } = true;
 
     public bool HasWrongsContainers => _wrongContainers.Count > 0;
+    public bool IsWayFree => _obstacleChecker.HasObstacles == false;
+    public bool CanMove => IsWayFree && HasWrongsContainers == false;
 
     public event Action<Car> Exited;
     public event Action<Car, bool> LoadingCompleted;
@@ -46,8 +47,9 @@ public class Car : MonoBehaviour
     private void OnDestroy()
     {
         Game.LevelLoader.LevelExited -= OnLevelExit;
+        _obstacleChecker.ObstaclesChanged -= OnObstaclesChanged;
 
-        if(_moveDispose != null)
+        if (_moveDispose != null)
             _moveDispose.Dispose();
     }
 
@@ -56,7 +58,7 @@ public class Car : MonoBehaviour
         Game.LevelLoader.LevelExited += OnLevelExit;
         Game.Sound.PlayCarNoiseSound(_carNoiseSource);
 
-        _obstacleChecker.Init(this);
+        _obstacleChecker.ObstaclesChanged += OnObstaclesChanged;
 
         NeedColor = needColor;
         MoveToParking(place);
@@ -109,20 +111,15 @@ public class Car : MonoBehaviour
 
         if (isHasAvailibleColorContainer == false) // если ожидаемого цвета контейнеров больше нет - получаем новый
         {
-            if (levelManager.HasAvailibleColors() && levelManager.HasAvailibleContainers)
-            {
-                NeedColor = levelManager.GetRandomAvailibleContainerColor();
-            }
+            if (levelManager.HasAnyAvailibleColor && levelManager.HasAvailibleContainers)
+                NeedColor = levelManager.GetRandomAvailibleContainerColor;
             else
-            {
                 CopmpleteLoading(false);
-            }
         }
     }
 
-    public void SetFreeWay(bool value)
+    public void OnObstaclesChanged()
     {
-        IsWayFree = value;
         FreeWayChanged?.Invoke();
     }
 
@@ -142,9 +139,9 @@ public class Car : MonoBehaviour
     {
         Vector3 target = point.position;
         target.y = 0;
-        var heading = target - transform.position;
+        var distance = target - transform.position;
 
-        if (heading.sqrMagnitude < _destinationDistance * _destinationDistance)
+        if (distance.sqrMagnitude < _destinationDistance * _destinationDistance)
         {
             if (onComplete != null)
                 onComplete?.Invoke();
@@ -158,10 +155,8 @@ public class Car : MonoBehaviour
             return;
         }
 
-        if (IsWayFree && HasWrongsContainers == false)
-        {
+        if (CanMove)
             transform.position += (target - transform.position).normalized * _speed * Time.deltaTime;
-        }
     }
 
     private void OnParking(ParkingPlace place)

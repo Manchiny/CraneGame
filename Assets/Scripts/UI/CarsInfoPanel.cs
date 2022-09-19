@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using UnityEngine;
 
 public class CarsInfoPanel : MonoBehaviour
@@ -7,7 +6,6 @@ public class CarsInfoPanel : MonoBehaviour
     [SerializeField] private RectTransform _content;
 
     private CarSpawner _carSpawner;
-    private List<GameObject> _indicators;
 
     public void Init()
     {

@@ -20,13 +20,12 @@ public class CraneController : MonoBehaviour
     [SerializeField] private float _minMagnitY = 0f;
     [SerializeField] private float _maxMagnitY = 13f;
 
-
     private const float MaxArrowDistance = 13f;
     private const float MinArrowDistance = 0.01f;
     private const float MinFirstArrowDistance = -3f;
+    private const float MaxSideValue = 70f;
 
     private Vector3 _arrowMoveDirection = new Vector3(0, 0, 1);
-   
 
     private Crane _crane;
     private Magnit _magnit;
@@ -35,7 +34,7 @@ public class CraneController : MonoBehaviour
     private IDisposable _forceDispose;
     private bool _isHeightBlocked;
 
-    public Magnit Magnit { get => _magnit; }
+    public Magnit Magnit  => _magnit;
     public Rigidbody JointRB { get; private set; }
     public Rigidbody MagnitRB { get; private set; }
 
@@ -77,7 +76,10 @@ public class CraneController : MonoBehaviour
 
     public void MoveSide(float horizontal)
     {
-        transform.Translate(_craneMoveDirection * _speed * horizontal * Time.deltaTime);
+        bool canMove = horizontal < 0 ? transform.position.z < MaxSideValue : transform.position.z > -MaxSideValue;
+
+        if (canMove)
+            transform.Translate(_craneMoveDirection * _speed * horizontal * Time.deltaTime);
     }
 
     public void RotateContainer(float factor = 1)
@@ -119,7 +121,7 @@ public class CraneController : MonoBehaviour
             _arrow2.Translate(_arrowMoveDirection * _arrowSpeed * factor * Time.deltaTime);
         else if (_arrow3.localPosition.z < MaxArrowDistance)
             _arrow3.Translate(_arrowMoveDirection * _arrowSpeed * factor * Time.deltaTime);
-        else if (_arrow1.localPosition.z < MaxArrowDistance/2f)
+        else if (_arrow1.localPosition.z < MaxArrowDistance / 2f)
             _arrow1.Translate(_arrowMoveDirection * _arrowSpeed * factor * Time.deltaTime);
     }
 
@@ -142,19 +144,19 @@ public class CraneController : MonoBehaviour
 
             Vector3 moveVector = new Vector3(0, _cableSpeed, 0) * Time.deltaTime * factor;
             _joint.connectedAnchor -= moveVector;
-        }            
+        }
     }
 
     private void MagnitDown(float factor = 1)
     {
-        if (_joint.connectedAnchor.y < _maxMagnitY && _crane.IsDownMoveFreeze == false)
+        if (_joint.connectedAnchor.y < _maxMagnitY && _magnit.CanMoveDown)
         {
             JointRB.WakeUp();
             MagnitRB.WakeUp();
 
             Vector3 moveVector = new Vector3(0, _cableSpeed, 0) * Time.deltaTime * factor;
             _joint.connectedAnchor -= moveVector;
-        }           
+        }
     }
 
     private void ForceMagnitUp(float needHeight, Action onComplete)

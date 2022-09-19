@@ -25,13 +25,12 @@ public class MainMenuWindow : AbstractWindow
     private void StartGame()
     {
         Game.Locker.Lock(LockKey);
-        Game.LevelLoader.StartGame(OnLoadingComplete);
-
-        void OnLoadingComplete()
-        {
-            Close();
-            Game.Locker.Unlock(LockKey);
-        }
+        Game.LevelLoader.StartGame()
+            .Then(() => 
+                {
+                    Close();
+                    Game.Locker.Unlock(LockKey);
+                });
     }
 
     private void OnButtonCloseClick()

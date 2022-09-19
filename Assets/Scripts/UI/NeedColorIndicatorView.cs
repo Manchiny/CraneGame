@@ -68,7 +68,6 @@ public class NeedColorIndicatorView : MonoBehaviour
 
     private void ShowHideNotify()
     {
-        bool needShow = Car.IsWayFree == false || Car.HasWrongsContainers;
-        _notify.SetActive(needShow);
+        _notify.SetActive(Car.CanMove == false);
     }
 }

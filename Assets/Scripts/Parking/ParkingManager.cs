@@ -51,6 +51,7 @@ public class ParkingManager : MonoBehaviour
             else
                 return place;
         }
+
         return place;
     }
 

@@ -1,6 +1,7 @@
 using DG.Tweening;
 using RSG;
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody))]
@@ -11,6 +12,9 @@ public class Magnit : MonoBehaviour
     private const float ContainersWidth = 3f;
     private const float MagnetizeHeight = 0.35f;
 
+    private const float MinRotationXToAddHeight = 45f;
+    private const float MaxRotationXToAddHeight = 315f;
+
     private Crane _crane;
     private Container _conteiner;
 
@@ -19,6 +23,12 @@ public class Magnit : MonoBehaviour
 
     private Rigidbody _rigidbody;
     private Collider _collider;
+
+    private HashSet<GameObject> _obstacles = new HashSet<GameObject>();
+
+    public bool IsDownMoveFreeze { get; private set; }
+    public bool HasObstacles => _obstacles.Count > 0;
+    public bool CanMoveDown => IsDownMoveFreeze == false && HasObstacles == false;
 
     public bool IsFreezed { get; private set; }
 
@@ -37,12 +47,12 @@ public class Magnit : MonoBehaviour
 
     private void OnCollisionEnter(Collision collision)
     {
-        _crane.IsDownMoveFreeze = true;
+        _obstacles.Add(collision.gameObject);
     }
 
     private void OnCollisionExit(Collision collision)
     {
-        _crane.IsDownMoveFreeze = false;
+        _obstacles.Remove(collision.gameObject);
     }
 
     public void Init(Crane cran)
@@ -50,7 +60,9 @@ public class Magnit : MonoBehaviour
         _rigidbody = GetComponent<Rigidbody>();
         _collider = GetComponent<Collider>();
         _crane = cran;
-        
+
+        _obstacles.Clear();
+
         Free();
 
         _conteiner = null;
@@ -68,15 +80,14 @@ public class Magnit : MonoBehaviour
 
             RotationChanged?.Invoke(false, 0);
 
-            _conteiner.transform.parent = null;
-            _conteiner.AddRigidbody();
-            _conteiner.SetMagnitizeStatus(false);
+            _conteiner.SetFree();
 
-            _crane.Controller.StartForceMagnitUp(0.4f, OnComplete);
+            _crane.Controller.StartForceMagnitUp(0.4f, OnLifted);
 
-            void OnComplete()
+            void OnLifted()
             {
                 Unfreeze();
+                _obstacles.Clear();
             }
         }
     }
@@ -103,16 +114,11 @@ public class Magnit : MonoBehaviour
         if (IsFreezed)
             return;
 
-        _inProcess = false;
+        _inProcess = true;
+        IsDownMoveFreeze = true;
 
-        _crane.IsDownMoveFreeze = true;
         _conteiner = container;
-        _conteiner.SetMagnitizeStatus(true);
-
-        var contRigidbody = container.GetComponent<Rigidbody>();
-
-        if (contRigidbody != null)
-            Destroy(contRigidbody);
+        _conteiner.OnMagniteze();
 
         _crane.Joint.connectedBody = null;
 
@@ -133,14 +139,15 @@ public class Magnit : MonoBehaviour
                 anchors.x = 0;
                 anchors.z = 0;
 
-                container.transform.parent = this.transform;
+                container.transform.parent = transform;
                 _rigidbody.isKinematic = false;
                 _crane.Joint.autoConfigureConnectedAnchor = false;
                 _crane.Joint.connectedAnchor = anchors;
 
-                _crane.IsDownMoveFreeze = false;
+                IsDownMoveFreeze = false;
 
                 float y = _conteiner.transform.localRotation.eulerAngles.y;
+                _inProcess = false;
                 RotationChanged?.Invoke(true, y);
             });
     }
@@ -154,16 +161,16 @@ public class Magnit : MonoBehaviour
 
         var contTransform = container.transform;
 
-        var addHeight = MagnetizeHeight;
+        var additionalHeight = MagnetizeHeight;
         var contRotation = contTransform.rotation.eulerAngles;
 
-        if (contRotation.x > 45 && contRotation.x < 315 || contRotation.x < -45 && contRotation.x > -225)
-            addHeight += ContainersWidth / 2;
+        if (contRotation.x > MinRotationXToAddHeight && contRotation.x < MaxRotationXToAddHeight || contRotation.x < -MinRotationXToAddHeight && contRotation.x > -MaxRotationXToAddHeight)
+            additionalHeight += ContainersWidth / 2;
 
         contRotation.x = 0;
         contRotation.z = 0;
 
-        _moveSequence.Append(contTransform.DOMoveY(contTransform.position.y + addHeight, MagnetyzeAnimationTime));
+        _moveSequence.Append(contTransform.DOMoveY(contTransform.position.y + additionalHeight, MagnetyzeAnimationTime));
         _moveSequence.Join(contTransform.DORotate(contRotation, MagnetyzeAnimationTime));
 
         _moveSequence.Play()

@@ -9,22 +9,23 @@ public class Ship : MonoBehaviour
 {
     [SerializeField] private List<Transform> _containerPlacement;
     [SerializeField] private Transform _containerHolder;
-    [SerializeField] private Container _containerPrefab;
     [SerializeField] private MeshFilter _shipBody;
     [SerializeField] private float _parkingMoveTime;
     [Space]
     [SerializeField] private AnimationCurve _moveSpeedCurve;
 
-    private ShipConfig _config;
+    private const int MaxOneColorContainersDefault = 200;
     private int _raws = 2;
+
+    private Container _containerPrefab;
+    private ShipConfig _config;
 
     private float _containersHeight;
     private List<Container> _containers;
+    private Dictionary<ContainerColor, int> _availibleCollors;
 
     public MeshFilter ShipBody => _shipBody;
     public int ContainersCount => _containers == null ? 0 : _containers.Count;
-
-    public Dictionary<ContainerColor, int> AvailibleCollors { get; private set; }
 
     public event Action<Container> ContainerCrushed;
     public event Action ContainersEnded;
@@ -34,21 +35,24 @@ public class Ship : MonoBehaviour
         Game.LevelLoader.LevelExited -= OnExitLevel;
     }
 
-    public void Init(ShipConfig config)
+    public void Init(ShipConfig config, Container containerPrefab)
     {
+        _containerPrefab = containerPrefab;
         _containers = new List<Container>();
+
         Game.LevelLoader.LevelExited += OnExitLevel;
 
         _containersHeight = _containerPrefab.ContainerHeight;
 
         _config = config;
         _raws = _config.Raws;
+
         var configColors = GetConfigAvailibleColor(config.AvailibleColors);
 
-        AvailibleCollors = new Dictionary<ContainerColor, int>();
+        _availibleCollors = new Dictionary<ContainerColor, int>();
 
         foreach (var color in configColors)
-            AvailibleCollors.Add(color.Key, 0);
+            _availibleCollors.Add(color.Key, 0);
 
         InitContainers(configColors, config.StronglyCount());
     }
@@ -56,16 +60,17 @@ public class Ship : MonoBehaviour
     public void RemoveContainer(Container container)
     {
         _containers.Remove(container);
+
         if (_containers.Count == 0)
             ContainersEnded?.Invoke();
     }
 
     public void RemoveAvailibleColorsCount(ContainerColor color)
     {
-        if (AvailibleCollors.TryGetValue(color, out int value))
+        if (_availibleCollors.TryGetValue(color, out int value))
         {
             value--;
-            AvailibleCollors[color] = value;
+            _availibleCollors[color] = value;
         }
     }
 
@@ -77,17 +82,47 @@ public class Ship : MonoBehaviour
 
     public void MoveTo(Transform targetPoint)
     {
-        var position = targetPoint.position;
-
         transform.DOMoveZ(targetPoint.position.z, _parkingMoveTime, false)
             .SetEase(Ease.InOutQuad)
             .SetLink(gameObject);
     }
 
+    public ContainerColor GetRandomAvailibleContainerColor()
+    {
+        List<ContainerColor> availibleCollors = new List<ContainerColor>();
+
+        foreach (var color in _availibleCollors)
+        {
+            if (color.Value > 0)
+                availibleCollors.Add(color.Key);
+        }
+
+        int count = availibleCollors.Count;
+        int random = UnityEngine.Random.Range(0, count);
+
+        ContainerColor randomColor = availibleCollors[random];
+        RemoveAvailibleColorsCount(randomColor);
+
+        return randomColor;
+    }
+
+    public bool HasAvailibleColor(ContainerColor color) => _availibleCollors[color] >= 0;
+
+    public bool HasAvailibleColor()
+    {
+        foreach (var color in _availibleCollors)
+        {
+            if (color.Value > 0)
+                return true;
+        }
+
+        return false;
+    }
+
     private void InitContainers(Dictionary<ContainerColor, int> availableColors, int stronglyCount)
     {
         var newAvailableColors = availableColors;
-        float offset = 0.1f;
+        float heightOffset = 0.1f;
 
         if (stronglyCount > 0)
         {
@@ -99,9 +134,7 @@ public class Ship : MonoBehaviour
                 foreach (var place in _containerPlacement)
                 {
                     if (_containers.Count < stronglyCount)
-                    {
-                        CreateContainer(place, i);
-                    }
+                        CreateContainer(place, i + 1);
                 }
             }
         }
@@ -110,20 +143,18 @@ public class Ship : MonoBehaviour
             for (int i = 0; i < _raws; i++)
             {
                 foreach (var place in _containerPlacement)
-                {
-                    CreateContainer(place, i);
-                }
+                    CreateContainer(place, i + 1);
             }
         }
 
         foreach (var place in _containerPlacement)
             place.gameObject.SetActive(false);
 
-        void CreateContainer(Transform place, int i)
+        void CreateContainer(Transform place, int rawNumber)
         {
             Vector3 position = place.position;
+            position.y = place.position.y + (_containersHeight + heightOffset) * (rawNumber);
 
-            position.y = place.position.y + (_containersHeight + offset) * (1 + i);
             var container = Instantiate(_containerPrefab, position, place.rotation, _containerHolder);
 
             var color = GetColorRandom();
@@ -138,7 +169,7 @@ public class Ship : MonoBehaviour
             int count = keyList.Count;
 
             ContainerColor randomColor = keyList[UnityEngine.Random.Range(0, count)];
-            newAvailableColors[randomColor] -= 1;
+            newAvailableColors[randomColor]--;
 
             if (newAvailableColors[randomColor] <= 0)
                 newAvailableColors.Remove(randomColor);
@@ -147,22 +178,22 @@ public class Ship : MonoBehaviour
         }
     }
 
-    private Dictionary<ContainerColor, int> GetConfigAvailibleColor(AvailableColor[] configColors)
+    private Dictionary<ContainerColor, int> GetConfigAvailibleColor(IReadOnlyList<AvailableColor> configColors)
     {
         var result = new Dictionary<ContainerColor, int>();
 
-        foreach (var item in configColors)
-            result.Add(item.ContainerColor, item.MaxCount == 0 ? 200 : item.MaxCount);
+        foreach (var color in configColors)
+            result.Add(color.ContainerColor, color.MaxCount == 0 ? MaxOneColorContainersDefault : color.MaxCount);
 
         return result;
     }
-  
+
     private void AddAvailibleColorsCount(ContainerColor color)
     {
-        if (AvailibleCollors.TryGetValue(color, out int value))
+        if (_availibleCollors.TryGetValue(color, out int value))
         {
             value++;
-            AvailibleCollors[color] = value;
+            _availibleCollors[color] = value;
         }
     }
 

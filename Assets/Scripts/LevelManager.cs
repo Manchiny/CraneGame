@@ -1,6 +1,4 @@
-using RSG;
 using System;
-using System.Collections.Generic;
 using UnityEngine;
 using static ColorManager;
 using static LevelConfigs;
@@ -40,7 +38,7 @@ public class LevelManager : MonoBehaviour
         _nextShipId = 0;
         LevelConfig = config;
         _levelLoader = loader;
-        _levelLoader.LoadingCompleted += OnLoadingLevelComplete;
+        _levelLoader.LevelLoaded += OnLoadingLevelComplete;
 
         CanCrushContainers = LevelConfig.MaxContainerCrushes;
 
@@ -63,40 +61,13 @@ public class LevelManager : MonoBehaviour
         return canContinueGame;
     }
 
+    public ContainerColor GetRandomAvailibleContainerColor => CurrentShip.GetRandomAvailibleContainerColor();
+    public bool HasAnyAvailibleColor => CurrentShip.HasAvailibleColor();
+
     public Color GetConformigSignalColor(ContainerColor color) => Game.ColorManager.GetConformingColor(color);
-
-    public ContainerColor GetRandomAvailibleContainerColor()
-    {
-        var shipColors = CurrentShip.AvailibleCollors;
-        List<ContainerColor> availibleCollors = new List<ContainerColor>();
-        foreach (var color in shipColors)
-        {
-            if (color.Value > 0)
-                availibleCollors.Add(color.Key);
-        }
-
-        int count = availibleCollors.Count;
-        int random = UnityEngine.Random.Range(0, count);
-        ContainerColor randomColor = availibleCollors[random];
-        CurrentShip.RemoveAvailibleColorsCount(randomColor);
-
-        return randomColor;
-    }
-
     public Material GetSignalMaterial(ContainerColor color) => Game.ColorManager.GetSignalMaterial(color);
-    public bool HasAvailibleColor(ContainerColor color) => CurrentShip.AvailibleCollors[color] >= 0;
+    public bool HasAvailibleColor(ContainerColor color) => CurrentShip.HasAvailibleColor(color);
     public bool HasAvailibleContainers => (CurrentShip != null && CurrentShip.ContainersCount > 0);
-
-    public bool HasAvailibleColors()
-    {
-        var shipColors = CurrentShip.AvailibleCollors;
-        foreach (var color in shipColors)
-        {
-            if (color.Value > 0)
-                return true;
-        }
-        return false;
-    }
 
     private void LevelComplete()
     {
@@ -149,7 +120,7 @@ public class LevelManager : MonoBehaviour
 
     private void OnLoadingLevelComplete()
     {
-        _levelLoader.LoadingCompleted -= OnLoadingLevelComplete;
+        _levelLoader.LevelLoaded -= OnLoadingLevelComplete;
     }
 }
 

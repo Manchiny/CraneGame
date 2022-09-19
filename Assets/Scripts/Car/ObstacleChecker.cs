@@ -1,22 +1,21 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class ObstacleChecker : Checker
 {
-    private Car _car;
     private HashSet<Collider> _obstacles = new HashSet<Collider>();
 
-    public void Init(Car car)
-    {
-        _car = car;
-    }
+    public bool HasObstacles => _obstacles.Count > 0;
+
+    public event Action ObstaclesChanged;
 
     private void OnTriggerEnter(Collider other)
     {
         if(other.gameObject.GetComponent<Container>() != null || other.gameObject.GetComponent<CarPlatform>() != null)
         {
             _obstacles.Add(other);
-            _car.SetFreeWay(false);
+            ObstaclesChanged?.Invoke();
         }
        
     }
@@ -26,9 +25,7 @@ public class ObstacleChecker : Checker
         if (other.gameObject.GetComponent<Container>() != null || other.gameObject.GetComponent<CarPlatform>() != null)
         {
             _obstacles.Remove(other);
-
-            if (_obstacles.Count == 0)
-                _car.SetFreeWay(true);
+            ObstaclesChanged?.Invoke();
         }
     }
 }

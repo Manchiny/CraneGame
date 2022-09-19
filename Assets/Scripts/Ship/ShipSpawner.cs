@@ -8,6 +8,8 @@ public class ShipSpawner : MonoBehaviour
     [SerializeField] private Transform _spawnPoint;
     [SerializeField] private Transform _parkingPoint;
     [SerializeField] private Transform _exitPoint;
+    [Space]
+    [SerializeField] private Container _containerPrefab;
     public Transform ParkingPoint => _parkingPoint;
     public Transform ExitPoint => _exitPoint;
 
@@ -18,7 +20,7 @@ public class ShipSpawner : MonoBehaviour
         position.x = OFFSET_X + boundX * config.ShipPrefab.ShipBody.transform.localScale.x / 2;
 
         var ship = Instantiate(config.ShipPrefab, position, _spawnPoint.rotation).GetComponent<Ship>();
-        ship.Init(config);
+        ship.Init(config, _containerPrefab);
 
         return ship;
     }

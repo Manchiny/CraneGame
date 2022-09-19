@@ -1,6 +1,5 @@
 using RSG;
 using System;
-using System.Collections;
 using UnityEngine;
 using static LevelConfigs;
 
@@ -12,10 +11,10 @@ public class LevelLoader : MonoBehaviour
 
     private LoadingWindow _loader;
 
-    public event Action LoadingCompleted;
+    public event Action LevelLoaded;
     public event Action LevelExited;
 
-    public IPromise StartGame(Action onComplete)
+    public IPromise StartGame()
     {
         Promise promise = new Promise();
         _levelConfig = GetLevel();
@@ -31,14 +30,10 @@ public class LevelLoader : MonoBehaviour
 
             Game.LevelManager.StartLevel(_levelConfig, this, window);
 
-            AwaitingPromise(1f)
-            .Then(() => _loader?.Close())
-            .Then(() =>
-            {
-                LoadingCompleted?.Invoke();
-                onComplete?.Invoke();
-            })
-            .Then(() => promise.Resolve());
+            Utils.WaitSeconds(1f)
+                .Then(() => _loader?.Close())
+                .Then(() => LevelLoaded?.Invoke())
+                .Then(() => promise.Resolve());
         }
         else
         {
@@ -56,14 +51,10 @@ public class LevelLoader : MonoBehaviour
         _loader = LoadingWindow.Show();
         LevelExited?.Invoke();
 
-        AwaitingPromise(1f)
-        .Then(() => _loader?.Close())
-        .Then(() => MainMenuWindow.Show())
-        .Then(() =>
-        {
-           // LoadingCompleted?.Invoke();
-            onComplete?.Invoke();
-        });
+        Utils.WaitSeconds(1f)
+            .Then(() => _loader?.Close())
+            .Then(() => MainMenuWindow.Show())
+            .Then(() => onComplete?.Invoke());
     }
 
     private LevelConfig GetLevel()
@@ -74,19 +65,5 @@ public class LevelLoader : MonoBehaviour
             return _levels[levelId];
         else
             return null;
-    }
-
-    private IPromise AwaitingPromise(float seconds)
-    {
-        Promise promise = new Promise();
-        StartCoroutine(Timer());
-
-        IEnumerator Timer()
-        {
-            yield return new WaitForSeconds(seconds);
-            promise.Resolve();
-        }
-
-        return promise;
     }
 }

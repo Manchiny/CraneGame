@@ -589,6 +589,7 @@ MonoBehaviour:
   _spawnPoint: {fileID: 884829566}
   _parkingPoint: {fileID: 746775525}
   _exitPoint: {fileID: 1287033065}
+  _containerPrefab: {fileID: 1929241542411675384, guid: bf5efd1cff5df494c9fd5a47405d09dc, type: 3}
 --- !u!4 &884829566
 Transform:
   m_ObjectHideFlags: 0
