@@ -1,7 +1,7 @@
 using System;
 using UniRx;
 using UnityEngine;
-using static ColorManager;
+using static ColorDataBase;
 
 public class CarSpawner : MonoBehaviour
 {

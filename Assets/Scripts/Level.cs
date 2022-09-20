@@ -1,6 +1,6 @@
 using System;
 using UnityEngine;
-using static ColorManager;
+using static ColorDataBase;
 using static LevelConfigs;
 
 public class Level : MonoBehaviour
@@ -64,8 +64,8 @@ public class Level : MonoBehaviour
     public ContainerColor GetRandomAvailibleContainerColor => CurrentShip.GetRandomAvailibleContainerColor();
     public bool HasAnyAvailibleColor => CurrentShip.HasAvailibleColor();
 
-    public Color GetConformigSignalColor(ContainerColor color) => Game.ColorManager.GetConformingColor(color);
-    public Material GetSignalMaterial(ContainerColor color) => Game.ColorManager.GetSignalMaterial(color);
+    public Color GetConformigSignalColor(ContainerColor color) => Game.ColorDatabase.GetConformingColor(color);
+    public Material GetSignalMaterial(ContainerColor color) => Game.ColorDatabase.GetSignalMaterial(color);
     public bool HasAvailibleColor(ContainerColor color) => CurrentShip.HasAvailibleColor(color);
     public bool HasAvailibleContainers => (CurrentShip != null && CurrentShip.ContainersCount > 0);
 

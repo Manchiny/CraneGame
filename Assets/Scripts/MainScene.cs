@@ -4,9 +4,13 @@ using UnityEngine.SceneManagement;
 
 public class MainScene : MonoBehaviour
 {
+    [SerializeField] private LoaderWindow _window;
+
     private const int GameSceneId = 1;
 
-    [SerializeField] private LoaderWindow _window;
+    private const float MaxProgressSliderValue = 0.999f;
+    private const float ProgressBarSlowdownFactor = 0.9f;
+    private const float SecondsDelayAfterSceneLoaded = 0.5f;
 
     private void Start()
     {
@@ -19,14 +23,14 @@ public class MainScene : MonoBehaviour
         AsyncOperation operation = SceneManager.LoadSceneAsync(GameSceneId);
         operation.allowSceneActivation = false;
 
-        while(!operation.isDone)
+        while (operation.isDone == false)
         {
-            float progress = operation.progress/0.9f;
+            float progress = operation.progress / ProgressBarSlowdownFactor;
             _window.SetProgress(progress);
-        
-            if(_window.GetProgessBarValue() >= 0.999f)
+
+            if (_window.GetProgessBarValue() >= MaxProgressSliderValue)
             {
-                yield return new WaitForSeconds(0.5f);
+                yield return new WaitForSeconds(SecondsDelayAfterSceneLoaded);
                 operation.allowSceneActivation = true;
             }
 

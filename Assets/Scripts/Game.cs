@@ -5,10 +5,8 @@ public class Game : MonoBehaviour
     [SerializeField] private WindowsController _windowsController;
 	[SerializeField] private LevelLoader _levelLoader;
 	[SerializeField] private Level _level;
-	[SerializeField] private ColorManager _colors;
+	[SerializeField] private ColorDataBase _colors;
 	[SerializeField] private GameSound _gameSound;
-	//[Space]
-	//[SerializeField] private Audi
 
 	private UserData _userData;
 
@@ -17,7 +15,7 @@ public class Game : MonoBehaviour
     public static WindowsController Windows => Instance._windowsController;
 	public static LevelLoader LevelLoader => Instance._levelLoader;
 	public static Level Level => Instance._level;
-	public static ColorManager ColorManager => Instance._colors;
+	public static ColorDataBase ColorDatabase => Instance._colors;
 	public static Locker Locker => Instance._windowsController.Locker;
 	public static UserData User => Instance._userData;
 	public static GameSound Sound => Instance._gameSound;
@@ -53,7 +51,6 @@ public class Game : MonoBehaviour
 		_userData = new UserData();
 
 		Sound.Init(LevelLoader);
-		_colors.Init();
 		MainMenuWindow.Show();
 	}
 }

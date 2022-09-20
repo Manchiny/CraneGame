@@ -3,7 +3,7 @@ using RSG;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using static ColorManager;
+using static ColorDataBase;
 using static LevelConfigs;
 
 [RequireComponent(typeof(AudioSource))]

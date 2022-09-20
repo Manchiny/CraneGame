@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using static ColorManager;
+using static ColorDataBase;
 
 [CreateAssetMenu]
 public class LevelConfigs : ScriptableObject

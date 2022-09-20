@@ -1,6 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
-using static ColorManager;
+using static ColorDataBase;
 
 public class NeedColorIndicatorView : MonoBehaviour
 {

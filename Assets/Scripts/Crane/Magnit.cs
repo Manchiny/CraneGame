@@ -15,6 +15,8 @@ public class Magnit : MonoBehaviour
     private const float MinRotationXToAddHeight = 45f;
     private const float MaxRotationXToAddHeight = 315f;
 
+    private const float ForceLiftMagniteDistance = 0.4f;
+
     private Crane _crane;
     private Container _conteiner;
 
@@ -51,7 +53,7 @@ public class Magnit : MonoBehaviour
             _obstacles.Add(collision.gameObject);
 
         if (_conteiner != null)
-            _conteiner.PlayHitSound();
+            _conteiner.Sound.PlayHitSound();
     }
 
     private void OnCollisionExit(Collision collision)
@@ -86,7 +88,7 @@ public class Magnit : MonoBehaviour
 
             _conteiner.SetFree();
 
-            _crane.Controller.StartForceMagnitUp(0.4f, OnLifted);
+            _crane.Controller.StartForceMagnitUp(ForceLiftMagniteDistance, OnLifted);
 
             void OnLifted()
             {

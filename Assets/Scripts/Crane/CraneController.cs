@@ -23,6 +23,7 @@ public class CraneController : MonoBehaviour
     private const float MaxArrowDistance = 13f;
     private const float MinArrowDistance = 0.01f;
     private const float MinFirstArrowDistance = -3f;
+
     private const float MaxSideValue = 70f;
 
     private Vector3 _arrowMoveDirection = new Vector3(0, 0, 1);
@@ -85,10 +86,9 @@ public class CraneController : MonoBehaviour
     public void RotateContainer(float factor = 1)
     {
         if (factor != 0)
-        {
             _magnit.Rotate(_magnitRotationSpeed * factor);
-        }
     }
+
     public void StartForceMagnitUp(float deltaHeight, Action onComplete)
     {
         _isHeightBlocked = true;
@@ -135,7 +135,7 @@ public class CraneController : MonoBehaviour
             _arrow1.Translate(_arrowMoveDirection * _arrowSpeed * factor * Time.deltaTime);
     }
 
-    private void MagnitUp(float factor = -1)
+    private void MagnitUp(float factor = 1)
     {
         if (_joint.connectedAnchor.y > _minMagnitY)
         {
@@ -147,7 +147,7 @@ public class CraneController : MonoBehaviour
         }
     }
 
-    private void MagnitDown(float factor = 1)
+    private void MagnitDown(float factor = -1)
     {
         if (_joint.connectedAnchor.y < _maxMagnitY && _magnit.CanMoveDown)
         {
@@ -162,7 +162,7 @@ public class CraneController : MonoBehaviour
     private void ForceMagnitUp(float needHeight, Action onComplete)
     {
         if (_joint.connectedAnchor.y > needHeight)
-            MagnitUp(1);
+            MagnitUp();
         else
         {
             _forceDispose.Dispose();

@@ -2,9 +2,10 @@ using DG.Tweening;
 using System;
 using UnityEngine;
 
+[RequireComponent(typeof(CanvasGroup))]
 public class OptionsPanel : MonoBehaviour
 {
-    private const float FadeDuration = .35f;
+    private const float FadeDuration = 0.35f;
 
     private RectTransform _rectTransform;
     private Sequence _sequence;

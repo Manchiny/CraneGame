@@ -2,10 +2,9 @@ using System;
 using System.Collections.Generic;
 using UniRx;
 using UnityEngine;
-using static ColorManager;
+using static ColorDataBase;
 
 [RequireComponent(typeof(BoxCollider))]
-[RequireComponent(typeof(AudioSource))]
 public class Container : MonoBehaviour
 {
     [SerializeField] private List<ConteinerCarChecker> _carCheckers;
@@ -14,14 +13,8 @@ public class Container : MonoBehaviour
     [SerializeField] private ExcessContainerChecker _excessContainerChecker;
     [Space]
     [SerializeField] private float _containerHeight = 3f;
-   
-    private const float MuteSoundAfterInitSeconds = 2f;
-    private const float MaxAngleXToFlip = 15f;
 
-    private const float WaterSoundDuration = 0.4f;
-    private const float HitSoundDuration = 0.4f;
-    private bool _isWaterSoundPlaying;
-    private bool _canPlayHitSound;
+    private const float MaxAngleXToFlip = 15f;
 
     private Ship _ship;
     private CarPlatform _carPlatform;
@@ -32,19 +25,21 @@ public class Container : MonoBehaviour
     private bool _isCrushed;
     private IDisposable _checkFlipDispose;
 
-    private Rigidbody _rigidbody;
+#region RigidbodySettings
+
     private float _mass;
     private float _drag;
     private bool _useGravity;
     private bool _isKinematic;
     private RigidbodyInterpolation _interpolation;
 
-    private bool _isSoundInited;
+#endregion
 
-    public AudioSource AudioSource { get; private set; }
+    public ContainerSound Sound { get; private set; }
     public ContainerColor ContainerColor { get; private set; }
+    public Rigidbody Rigidbody { get; private set; }
+
     public float ContainerHeight => _containerHeight;
-    public Rigidbody Rigidbody => _rigidbody;
 
     public bool OnCar
     {
@@ -69,7 +64,7 @@ public class Container : MonoBehaviour
         private set
         {
             if (value != _isMagnited && value == true)
-                Game.Sound.PlayHitSound(AudioSource);
+                Sound.PlayHitSound();
 
             _isMagnited = value;
 
@@ -78,30 +73,16 @@ public class Container : MonoBehaviour
         }
     }
 
-    private void Start()
-    {
-        AudioSource = GetComponent<AudioSource>();
-    }
-
     private void OnCollisionEnter(Collision collision)
     {
-        if (_isSoundInited && _isWaterSoundPlaying == false 
-            && ((collision.gameObject.TryGetComponent(out Magnit magnit) == true && magnit.IsFreezed == false) 
-            || (magnit == null && collision.gameObject.GetComponent<INoiseless>() == null)))
-        {
-            PlayHitSound();
-        }
+        if ((collision.gameObject.TryGetComponent(out Magnit magnit) && magnit.IsFreezed == false) || (magnit == null && collision.gameObject.GetComponent<INoiseless>() == null))
+            Sound.PlayHitSound();
 
-        if (collision.gameObject.GetComponent<CarPlatform>() == true)
-        {
-            _carPlatform = collision.gameObject.GetComponent<CarPlatform>();
+        if (collision.gameObject.TryGetComponent(out _carPlatform))
             OnCar = true;
-        }
 
         if (IsMagnited == false)
-        {
             StartCheckFlip();
-        }
     }
 
     private void OnTriggerEnter(Collider other)
@@ -135,26 +116,22 @@ public class Container : MonoBehaviour
     public void Init(Ship ship, ContainerColor color)
     {
         Game.LevelLoader.LevelExited += OnExitLevel;
-        _rigidbody = GetComponent<Rigidbody>();
+        Rigidbody = GetComponent<Rigidbody>();
 
         _ship = ship;
         SetConteinerColor(color);
         _excessContainerChecker.gameObject.SetActive(false);
         SaveRiggedbody();
 
-        Utils.WaitSeconds(MuteSoundAfterInitSeconds)
-            .Then(() =>
-            {
-                _isSoundInited = true;
-                _canPlayHitSound = true;
-            });
+        if (Sound == null)
+            Sound = gameObject.AddComponent<ContainerSound>();
+
+        Sound.Init();
     }
 
     public void SetConteinerColor(ContainerColor color)
     {
-        Material material = null;
-
-        if (Game.ColorManager.ContainerMaterials.TryGetValue(color, out material))
+        if (Game.ColorDatabase.TryGetConteinerMaterial(color, out Material material))
         {
             _body.sharedMaterial = material;
             ContainerColor = color;
@@ -198,35 +175,23 @@ public class Container : MonoBehaviour
         IsMagnited = true;
     }
 
-    public void PlayHitSound()
-    {
-        if(_canPlayHitSound)
-        {
-            _canPlayHitSound = false;
-            Game.Sound.PlayHitSound(AudioSource);
-
-            Utils.WaitSeconds(HitSoundDuration)
-                .Then(() => _canPlayHitSound = true);
-        }
-    }
-
     private void AddRigidbody()
     {
-        _rigidbody = gameObject.AddComponent<Rigidbody>();
-        _rigidbody.mass = _mass;
-        _rigidbody.drag = _drag;
-        _rigidbody.interpolation = _interpolation;
-        _rigidbody.useGravity = _useGravity;
-        _rigidbody.isKinematic = _isKinematic;
+        Rigidbody = gameObject.AddComponent<Rigidbody>();
+        Rigidbody.mass = _mass;
+        Rigidbody.drag = _drag;
+        Rigidbody.interpolation = _interpolation;
+        Rigidbody.useGravity = _useGravity;
+        Rigidbody.isKinematic = _isKinematic;
     }
 
     private void SaveRiggedbody()
     {
-        _mass = _rigidbody.mass;
-        _drag = _rigidbody.drag;
-        _interpolation = _rigidbody.interpolation;
-        _useGravity = _rigidbody.useGravity;
-        _isKinematic = _rigidbody.isKinematic;
+        _mass = Rigidbody.mass;
+        _drag = Rigidbody.drag;
+        _interpolation = Rigidbody.interpolation;
+        _useGravity = Rigidbody.useGravity;
+        _isKinematic = Rigidbody.isKinematic;
     }
 
     private void OnExitLevel()
@@ -241,12 +206,7 @@ public class Container : MonoBehaviour
         position.y = water.transform.position.y;
 
         water.PlaySplashesEffect(transform.position);
-        Game.Sound.PlaySplashSound(AudioSource);
-
-        _isWaterSoundPlaying = true;
-
-        Utils.WaitSeconds(WaterSoundDuration)
-            .Then(() => _isWaterSoundPlaying = false);
+        Sound.PlaySplashSound();
 
         Crush();
     }
@@ -279,7 +239,7 @@ public class Container : MonoBehaviour
 
     private void CompleteLoadig(bool isSucces)
     {
-        Destroy(_rigidbody);
+        Destroy(Rigidbody);
         _magnitChecker.gameObject.SetActive(false);
         _ship.RemoveContainer(this);
 
@@ -292,10 +252,10 @@ public class Container : MonoBehaviour
 
     private void StartCheckFlip()
     {
-        if (_rigidbody == null)
+        if (Rigidbody == null)
             return;
 
-        _checkFlipDispose = CheckForFlip(_rigidbody);
+        _checkFlipDispose = CheckForFlip(Rigidbody);
     }
 
     private IDisposable CheckForFlip(Rigidbody rb)

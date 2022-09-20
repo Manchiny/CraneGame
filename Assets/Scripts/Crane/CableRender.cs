@@ -1,5 +1,6 @@
 using UnityEngine;
 
+[RequireComponent(typeof(LineRenderer))]
 public class CableRender : MonoBehaviour
 {
     [SerializeField] Transform _target;
@@ -16,8 +17,7 @@ public class CableRender : MonoBehaviour
         UpdateRender();    
     }
 
-
-    void UpdateRender()
+    private void UpdateRender()
     {
         _lineRenderer.SetPosition(0, transform.position);
         _lineRenderer.SetPosition(1, _target.position);

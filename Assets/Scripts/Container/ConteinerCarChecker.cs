@@ -6,17 +6,13 @@ public class ConteinerCarChecker : Checker
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.gameObject.GetComponent<CarPlatform>() == true)
-        {
+        if (other.gameObject.TryGetComponent(out CarPlatform platform))
             IsOnCar = true;
-        }
     }
 
     private void OnTriggerExit(Collider other)
     {
-        if (other.gameObject.GetComponent<CarPlatform>() == true)
-        {
+        if (other.gameObject.TryGetComponent(out CarPlatform platform))
             IsOnCar = false;
-        }
     }
 }

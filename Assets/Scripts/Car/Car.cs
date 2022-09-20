@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UniRx;
 using UnityEngine;
-using static ColorManager;
+using static ColorDataBase;
 
 [RequireComponent(typeof(AudioSource))]
 public class Car : MonoBehaviour
