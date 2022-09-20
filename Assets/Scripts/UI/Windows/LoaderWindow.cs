@@ -4,13 +4,13 @@ using UnityEngine.UI;
 
 public class LoaderWindow : MonoBehaviour
 {
-    [SerializeField] private TextMeshProUGUI _title;
+    [SerializeField] private TextMeshProUGUI _versionText;
     [SerializeField] private Slider _progressBar;
 
     public void Init()
     {
         _progressBar.value = 0;
-        _title.text = "Портовый\nкран";
+        _versionText.text = "VER.: " + Application.version;
     }
 
     public void SetProgress(float progress)
