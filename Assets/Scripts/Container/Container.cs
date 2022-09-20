@@ -5,6 +5,7 @@ using UnityEngine;
 using static ColorManager;
 
 [RequireComponent(typeof(BoxCollider))]
+[RequireComponent(typeof(AudioSource))]
 public class Container : MonoBehaviour
 {
     [SerializeField] private List<ConteinerCarChecker> _carCheckers;
@@ -13,13 +14,14 @@ public class Container : MonoBehaviour
     [SerializeField] private ExcessContainerChecker _excessContainerChecker;
     [Space]
     [SerializeField] private float _containerHeight = 3f;
-    [SerializeField] private AudioSource _audioSource;
-
+   
     private const float MuteSoundAfterInitSeconds = 2f;
     private const float MaxAngleXToFlip = 15f;
 
     private const float WaterSoundDuration = 0.4f;
+    private const float HitSoundDuration = 0.4f;
     private bool _isWaterSoundPlaying;
+    private bool _canPlayHitSound;
 
     private Ship _ship;
     private CarPlatform _carPlatform;
@@ -39,6 +41,7 @@ public class Container : MonoBehaviour
 
     private bool _isSoundInited;
 
+    public AudioSource AudioSource { get; private set; }
     public ContainerColor ContainerColor { get; private set; }
     public float ContainerHeight => _containerHeight;
     public Rigidbody Rigidbody => _rigidbody;
@@ -66,7 +69,7 @@ public class Container : MonoBehaviour
         private set
         {
             if (value != _isMagnited && value == true)
-                Game.Sound.PlayHitSound(_audioSource);
+                Game.Sound.PlayHitSound(AudioSource);
 
             _isMagnited = value;
 
@@ -75,13 +78,18 @@ public class Container : MonoBehaviour
         }
     }
 
+    private void Start()
+    {
+        AudioSource = GetComponent<AudioSource>();
+    }
+
     private void OnCollisionEnter(Collision collision)
     {
         if (_isSoundInited && _isWaterSoundPlaying == false 
             && ((collision.gameObject.TryGetComponent(out Magnit magnit) == true && magnit.IsFreezed == false) 
             || (magnit == null && collision.gameObject.GetComponent<INoiseless>() == null)))
         {
-            Game.Sound.PlayHitSound(_audioSource);
+            PlayHitSound();
         }
 
         if (collision.gameObject.GetComponent<CarPlatform>() == true)
@@ -135,7 +143,11 @@ public class Container : MonoBehaviour
         SaveRiggedbody();
 
         Utils.WaitSeconds(MuteSoundAfterInitSeconds)
-            .Then(() => _isSoundInited = true);
+            .Then(() =>
+            {
+                _isSoundInited = true;
+                _canPlayHitSound = true;
+            });
     }
 
     public void SetConteinerColor(ContainerColor color)
@@ -157,6 +169,7 @@ public class Container : MonoBehaviour
         _isCrushed = true;
         _magnitChecker.gameObject.SetActive(false);
         _ship?.OnContainerCrush(this);
+        transform.SetParent(null);
     }
 
     public void AddContainerAsWrong(Container container)
@@ -183,6 +196,18 @@ public class Container : MonoBehaviour
             Destroy(Rigidbody);
 
         IsMagnited = true;
+    }
+
+    public void PlayHitSound()
+    {
+        if(_canPlayHitSound)
+        {
+            _canPlayHitSound = false;
+            Game.Sound.PlayHitSound(AudioSource);
+
+            Utils.WaitSeconds(HitSoundDuration)
+                .Then(() => _canPlayHitSound = true);
+        }
     }
 
     private void AddRigidbody()
@@ -216,7 +241,7 @@ public class Container : MonoBehaviour
         position.y = water.transform.position.y;
 
         water.PlaySplashesEffect(transform.position);
-        Game.Sound.PlaySplashSound(_audioSource);
+        Game.Sound.PlaySplashSound(AudioSource);
 
         _isWaterSoundPlaying = true;
 

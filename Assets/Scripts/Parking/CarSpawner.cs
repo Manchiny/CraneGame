@@ -11,7 +11,7 @@ public class CarSpawner : MonoBehaviour
     private const float Cooldawn = 2f;
     private const int MaxCars = 3;
 
-    private ParkingManager _parkingManager;
+    private Parking _parkingManager;
 
     private int _needCars = 3;
     private float _timer;
@@ -29,7 +29,7 @@ public class CarSpawner : MonoBehaviour
     public void Init(Action<Car> onCreateCar)
     {
         Game.LevelLoader.LevelExited += OnLevelExit;
-        _parkingManager = Game.LevelManager.ParkingManager;
+        _parkingManager = Game.Level.Parking;
         _car = null;
 
         NewCarCreated += onCreateCar;
@@ -54,14 +54,14 @@ public class CarSpawner : MonoBehaviour
 
     private void CreateCar()
     {
-        if (Game.LevelManager.HasAvailibleContainers == false || Game.LevelManager.HasAnyAvailibleColor == false)
+        if (Game.Level.HasAvailibleContainers == false || Game.Level.HasAnyAvailibleColor == false)
             return;
 
         var place = _parkingManager.GetFreeParkingPlaceOnEnd();
 
         if (place != null && _needCars > 0)
         {
-            ContainerColor color = Game.LevelManager.GetRandomAvailibleContainerColor;
+            ContainerColor color = Game.Level.GetRandomAvailibleContainerColor;
 
             var position = _spawnPoint.position;
             position.y = 0;

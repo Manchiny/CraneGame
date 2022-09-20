@@ -3,10 +3,10 @@ using UnityEngine;
 using static ColorManager;
 using static LevelConfigs;
 
-public class LevelManager : MonoBehaviour
+public class Level : MonoBehaviour
 {
     [SerializeField] private ShipSpawner _shipSpawner;
-    [SerializeField] private ParkingManager _parkingManager;
+    [SerializeField] private Parking _parking;
 
     private int _nextShipId;
     private LevelLoader _levelLoader;
@@ -27,7 +27,7 @@ public class LevelManager : MonoBehaviour
     public LevelConfig LevelConfig { get; private set; }
     public Ship CurrentShip { get; private set; }
 
-    public ParkingManager ParkingManager => _parkingManager;
+    public Parking Parking => _parking;
 
     public void StartLevel(LevelConfig config, LevelLoader loader, GameHUDWindow window)
     {
@@ -42,8 +42,8 @@ public class LevelManager : MonoBehaviour
 
         CanCrushContainers = LevelConfig.MaxContainerCrushes;
 
-        CreateShipOrLevelComplete();
-        _parkingManager.Init();
+        CreateShipOrCompleteLevel();
+        _parking.Init();
     }    
 
     public bool OnContainerCrush()
@@ -69,7 +69,7 @@ public class LevelManager : MonoBehaviour
     public bool HasAvailibleColor(ContainerColor color) => CurrentShip.HasAvailibleColor(color);
     public bool HasAvailibleContainers => (CurrentShip != null && CurrentShip.ContainersCount > 0);
 
-    private void LevelComplete()
+    private void CompleteLevel()
     {
         Game.User.SetCurrentLevel();
         LevelCompleteWindow.Show();
@@ -80,23 +80,26 @@ public class LevelManager : MonoBehaviour
         _levelLoader.ExitLevel(onComplete);
     }
 
-    private void CreateShipOrLevelComplete()
+    private void CreateShipOrCompleteLevel()
     {
         if (_isEnded == false)
         {
             if (_nextShipId < LevelConfig?.ShipConfigs?.Length)
             {
                 CurrentShip = _shipSpawner.CreateShip(LevelConfig.ShipConfigs[_nextShipId]);
-                CurrentShip.MoveTo(_shipSpawner.ParkingPoint);
+                CurrentShip.MoveTo(_shipSpawner.ParkingPoint)
+                    .Then(() => Game.Sound.PlayShipSignalSound(CurrentShip.AudioSource));
+
                 _nextShipId++;
+
                 CurrentShip.ContainersEnded += OnContainersEnded;
-                ParkingManager.SubscribeOnCrush(CurrentShip);
+                Parking.SubscribeOnCrush(CurrentShip);
 
                 _window.SetShipsInfo(_nextShipId, LevelConfig.ShipConfigs.Length);
             }
             else
             {
-                LevelComplete();
+                CompleteLevel();
             }
         }
     }
@@ -113,9 +116,12 @@ public class LevelManager : MonoBehaviour
     private void OnContainersEnded()
     {
         CurrentShip.ContainersEnded -= OnContainersEnded;
-        CurrentShip.MoveTo(_shipSpawner.ExitPoint);
 
-        CreateShipOrLevelComplete();
+        var oldShip = CurrentShip;
+        oldShip.MoveTo(_shipSpawner.ExitPoint)
+            .Then(() => Destroy(oldShip.gameObject));
+
+        CreateShipOrCompleteLevel();
     }
 
     private void OnLoadingLevelComplete()

@@ -36,7 +36,7 @@ public class ExitLevelWindow : AbstractWindow
         Game.Locker.Lock(LockKey);
         CloseAnimated();
         ClosePromise
-            .Then(() => Game.LevelManager.ExitLevel(AfterExit));   
+            .Then(() => Game.Level.ExitLevel(AfterExit));   
         
         void AfterExit()
         {

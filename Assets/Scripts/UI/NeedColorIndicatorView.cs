@@ -45,7 +45,7 @@ public class NeedColorIndicatorView : MonoBehaviour
 
     private void SetNeedColor(ContainerColor color)
     {
-        var newColor = Game.LevelManager.GetConformigSignalColor(color);
+        var newColor = Game.Level.GetConformigSignalColor(color);
         _needColor = newColor;
         _indicatorImage.color = newColor;
     }

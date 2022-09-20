@@ -134,7 +134,7 @@ GameObject:
   - component: {fileID: 407711022}
   - component: {fileID: 407711023}
   m_Layer: 0
-  m_Name: PARKING MANAGER
+  m_Name: Parking
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -618,6 +618,10 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1003724822, guid: e8c50af5327c6094f9add700acfcc956, type: 3}
+      propertyPath: _parking
+      value: 
+      objectReference: {fileID: 407711023}
+    - target: {fileID: 1003724822, guid: e8c50af5327c6094f9add700acfcc956, type: 3}
       propertyPath: _shipSpawner
       value: 
       objectReference: {fileID: 884829565}
@@ -710,6 +714,10 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6128147249981778518, guid: e8c50af5327c6094f9add700acfcc956, type: 3}
+      propertyPath: _level
+      value: 
+      objectReference: {fileID: 1278246799}
+    - target: {fileID: 6128147249981778518, guid: e8c50af5327c6094f9add700acfcc956, type: 3}
       propertyPath: _gameSound
       value: 
       objectReference: {fileID: 1003724821}
@@ -745,6 +753,10 @@ PrefabInstance:
       propertyPath: _carSignal
       value: 
       objectReference: {fileID: 8300000, guid: bca12d621a44c7345931c27b031a95fd, type: 3}
+    - target: {fileID: 9050625449027871277, guid: e8c50af5327c6094f9add700acfcc956, type: 3}
+      propertyPath: _shipSignal
+      value: 
+      objectReference: {fileID: 8300000, guid: 6b0972a8579c10041b5f16ae8af7b375, type: 3}
     - target: {fileID: 9050625449027871277, guid: e8c50af5327c6094f9add700acfcc956, type: 3}
       propertyPath: _hitClips.Array.size
       value: 4
@@ -1110,6 +1122,17 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!114 &1278246799 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 1003724822, guid: e8c50af5327c6094f9add700acfcc956, type: 3}
+  m_PrefabInstance: {fileID: 1003724820}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 526736c8c5163154aa6bcadb7fea6631, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1287033064
 GameObject:
   m_ObjectHideFlags: 0

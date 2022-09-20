@@ -37,7 +37,7 @@ public class LevelCompleteWindow : AbstractWindow
 
         CloseAnimated();
         ClosePromise
-            .Then(() => Game.LevelManager.ExitLevel(AfterExit));
+            .Then(() => Game.Level.ExitLevel(AfterExit));
 
         void AfterExit()
         {

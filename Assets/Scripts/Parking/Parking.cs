@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ParkingManager : MonoBehaviour
+public class Parking : MonoBehaviour
 {
     [SerializeField] private ParkingPlace[] _parkingPlaces;
     [SerializeField] private Transform _exitPoint;
@@ -77,7 +77,7 @@ public class ParkingManager : MonoBehaviour
         if (_crushedContainers.Count <= 0)
             return;
 
-        bool canContinue = Game.LevelManager.OnContainerCrush();
+        bool canContinue = Game.Level.OnContainerCrush();
         
         if(canContinue)
         {

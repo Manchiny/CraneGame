@@ -28,7 +28,7 @@ public class LevelLoader : MonoBehaviour
 
             var window = GameHUDWindow.Show(crane, _levelConfig);
 
-            Game.LevelManager.StartLevel(_levelConfig, this, window);
+            Game.Level.StartLevel(_levelConfig, this, window);
 
             Utils.WaitSeconds(1f)
                 .Then(() => _loader?.Close())

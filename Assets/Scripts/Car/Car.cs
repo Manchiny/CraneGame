@@ -96,7 +96,7 @@ public class Car : MonoBehaviour
 
         CurrentPlace.SetCar(null);
 
-        Transform exit = Game.LevelManager.ParkingManager.GetExitPoint();
+        Transform exit = Game.Level.Parking.GetExitPoint();
 
         _moveDispose = Observable.EveryUpdate().Subscribe(_ =>
                             {
@@ -106,7 +106,7 @@ public class Car : MonoBehaviour
 
     public void OnContainerCrush()
     {
-        var levelManager = Game.LevelManager;
+        var levelManager = Game.Level;
         bool isHasAvailibleColorContainer = levelManager.HasAvailibleColor(NeedColor);
 
         if (isHasAvailibleColorContainer == false) // если ожидаемого цвета контейнеров больше нет - получаем новый
@@ -179,7 +179,7 @@ public class Car : MonoBehaviour
 
     private void SetColorSignal(ContainerColor color)
     {
-        Material material = Game.LevelManager.GetSignalMaterial(color);
+        Material material = Game.Level.GetSignalMaterial(color);
         _colorSignal.sharedMaterial = material;
         _containerPlaceFX.startColor = material.color;
     }

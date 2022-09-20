@@ -1,10 +1,12 @@
 using DG.Tweening;
+using RSG;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
 using static ColorManager;
 using static LevelConfigs;
 
+[RequireComponent(typeof(AudioSource))]
 public class Ship : MonoBehaviour
 {
     [SerializeField] private List<Transform> _containerPlacement;
@@ -21,14 +23,23 @@ public class Ship : MonoBehaviour
     private ShipConfig _config;
 
     private float _containersHeight;
+
     private List<Container> _containers;
     private Dictionary<ContainerColor, int> _availibleCollors;
+
+    public AudioSource AudioSource { get; private set; }
 
     public MeshFilter ShipBody => _shipBody;
     public int ContainersCount => _containers == null ? 0 : _containers.Count;
 
     public event Action<Container> ContainerCrushed;
     public event Action ContainersEnded;
+
+    private void Start()
+    {
+        AudioSource = GetComponent<AudioSource>();
+    }
+
 
     private void OnDestroy()
     {
@@ -80,11 +91,16 @@ public class Ship : MonoBehaviour
         ContainerCrushed?.Invoke(container);
     }
 
-    public void MoveTo(Transform targetPoint)
+    public IPromise MoveTo(Transform targetPoint)
     {
+        Promise promise = new Promise();
+
         transform.DOMoveZ(targetPoint.position.z, _parkingMoveTime, false)
             .SetEase(Ease.InOutQuad)
-            .SetLink(gameObject);
+            .SetLink(gameObject)
+            .OnComplete(() => promise.Resolve());
+
+        return promise;
     }
 
     public ContainerColor GetRandomAvailibleContainerColor()

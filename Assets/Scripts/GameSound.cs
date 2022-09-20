@@ -9,6 +9,8 @@ public class GameSound : MonoBehaviour
     [Space]
     [SerializeField] private AudioClip _carNoise;
     [SerializeField] private AudioClip _carSignal;
+    [Space]
+    [SerializeField] private AudioClip _shipSignal;
 
     private const float SplashesVolume = 1f;
     private const float HitVolume = 0.1f;
@@ -16,6 +18,8 @@ public class GameSound : MonoBehaviour
 
     private const float CarNoiseVolume = 0.15f;
     private const float CarSignalVolume = 0.15f;
+
+    private const float ShipSignalVolume = 0.8f;
 
     private AudioSource _water;
 
@@ -73,6 +77,12 @@ public class GameSound : MonoBehaviour
 
         var clip = _hitClips[Random.Range(0, _hitClips.Count)];
         PlaySound(source, clip, HitVolume);
+    }
+
+    public void PlayShipSignalSound(AudioSource source)
+    {
+        source.loop = false;
+        PlaySound(source, _shipSignal, ShipSignalVolume);
     }
 
     private void PlaySound(AudioSource source, AudioClip clip, float volume)

@@ -47,7 +47,11 @@ public class Magnit : MonoBehaviour
 
     private void OnCollisionEnter(Collision collision)
     {
-        _obstacles.Add(collision.gameObject);
+        if(collision.gameObject.GetComponent<Checker>() == null)
+            _obstacles.Add(collision.gameObject);
+
+        if (_conteiner != null)
+            _conteiner.PlayHitSound();
     }
 
     private void OnCollisionExit(Collision collision)

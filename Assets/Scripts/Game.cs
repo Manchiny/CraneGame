@@ -4,7 +4,7 @@ public class Game : MonoBehaviour
 {
     [SerializeField] private WindowsController _windowsController;
 	[SerializeField] private LevelLoader _levelLoader;
-	[SerializeField] private LevelManager _levelManager;
+	[SerializeField] private Level _level;
 	[SerializeField] private ColorManager _colors;
 	[SerializeField] private GameSound _gameSound;
 	//[Space]
@@ -16,7 +16,7 @@ public class Game : MonoBehaviour
 
     public static WindowsController Windows => Instance._windowsController;
 	public static LevelLoader LevelLoader => Instance._levelLoader;
-	public static LevelManager LevelManager => Instance._levelManager;
+	public static Level Level => Instance._level;
 	public static ColorManager ColorManager => Instance._colors;
 	public static Locker Locker => Instance._windowsController.Locker;
 	public static UserData User => Instance._userData;
